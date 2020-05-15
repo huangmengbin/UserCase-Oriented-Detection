@@ -2,6 +2,11 @@ import json
 import urllib.request, urllib.parse
 import os
 
+# 这个代码以后别使用了
+
+
+
+
 
 def readJson(filePlace="../Resources/sample.json"):
     f = open(filePlace, encoding="utf-8")
@@ -69,4 +74,4 @@ def transJson(inputPlace="../Resources/sample.json", outputPlace="../Resources/h
     #     json.dump(bList, f)
 
 
-transJson("../Resources/test_data.json")
+

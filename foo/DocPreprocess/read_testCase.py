@@ -18,4 +18,4 @@ def run(filePlace):
     f.close()
 
 
-run("../Resources/testCases.json")
+run("../../Resources/testCases.json")

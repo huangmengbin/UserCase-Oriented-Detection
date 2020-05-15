@@ -3,7 +3,7 @@ import urllib.request, urllib.parse
 import os
 
 
-def readJson(filePlace="../Resources/hmbSB.json"):
+def readJson(filePlace="../../Resources/hmbSB.json"):
     f = open(filePlace, encoding="utf-8")
     res = f.read()
     f.close()
