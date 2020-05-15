@@ -42,14 +42,16 @@ def transJson(inputPlace="../Resources/sample.json", outputPlace="../Resources/h
                 userCaseDict[case_id] = aDist
             # only得分 > 0才进行分析
             if case["final_score"] > 0:
-                userCaseDict[case_id]["all_users"][use_id] = dict()
-                userCaseDict[case_id]["all_users"][use_id]["score"] = case["final_score"]
+
                 # 下面筛选出最高分的最后一次
                 codeURL = ""
                 for upload_record in case["upload_records"]:
                     if upload_record["score"] == case["final_score"]:
                         codeURL = upload_record["code_url"]
-                userCaseDict[case_id]["all_users"][use_id]["lastUpdate"] = codeURL
+                if codeURL != "":
+                    userCaseDict[case_id]["all_users"][use_id] = dict()
+                    userCaseDict[case_id]["all_users"][use_id]["score"] = case["final_score"]
+                    userCaseDict[case_id]["all_users"][use_id]["lastUpdate"] = codeURL
 
     f.close()
 
@@ -58,12 +60,13 @@ def transJson(inputPlace="../Resources/sample.json", outputPlace="../Resources/h
     bList = []
     for ii in aList:
         bDict = dict()
-        bDict[ii[0]] = ii[1]
+        bDict["case_id"] = ii[0]
+        bDict.update(ii[1])
         bList.append(bDict)
     print(str(bList)[0:6000])
 
-    with open(outputPlace, "w")as f:
-        json.dump(bList, f)
+    # with open(outputPlace, "w")as f:
+    #     json.dump(bList, f)
 
 
-readJson("../Resources/test_data.json")
+transJson("../Resources/test_data.json")
