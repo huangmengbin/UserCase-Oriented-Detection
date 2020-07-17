@@ -3,11 +3,6 @@ import urllib.request, urllib.parse
 import os
 
 # 这个代码以后别使用了
-
-
-
-
-
 def readJson(filePlace="../Resources/sample.json"):
     f = open(filePlace, encoding="utf-8")
     res = f.read()

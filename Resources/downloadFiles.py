@@ -4,7 +4,7 @@ import urllib.parse
 import urllib.request
 import zipfile
 
-basicFilePlace = "D:\\" + "czyFile\\"
+basicFilePlace = "F:\\" + "code_data1\\"
 
 
 #  本代码要在F盘创建code_data1才能运行
@@ -37,6 +37,7 @@ def remove_file(path):
 def download_each_case(case):
     print(case['case_id'])
     filename = urllib.parse.unquote(os.path.basename(case["case_zip"]))
+    print(filename)
     if not os.path.exists(basicFilePlace + str(case["case_id"]) + "_" + str(case["case_type"]) + "_" + filename):
         os.mkdir(basicFilePlace + str(case["case_id"]) + "_" + str(case["case_type"]) + "_" + filename)
 
@@ -92,3 +93,4 @@ if __name__ == '__main__':
     data = json.loads(res)
     for case in data:
         download_each_case(case)
+        print(case['case_id']+"finished")
