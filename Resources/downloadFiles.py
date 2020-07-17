@@ -45,43 +45,43 @@ def download_each_case(case):
         filename_ = user
         if not os.path.exists(basicFilePlace + str(case["case_id"]) + "_" + str(
                 case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
-            case['all_users'][user]["score"])  ):
+            case['all_users'][user]["score"]) + "_" ):
 
             try:
                 urllib.request.urlretrieve(case['all_users'][user]["lastUpdate"],
                                            basicFilePlace + str(case["case_id"]) + "_" + str(case[
                                                                                                  "case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
-                                               case['all_users'][user]["score"]))
+                                               case['all_users'][user]["score"]) + "_")
                 print('downloaded')
             except Exception as e:
                 print(e)
 
-            # try:
-            #     os.mkdir(basicFilePlace + str(case["case_id"]) + "_" + str(
-            #         case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
-            #         case['all_users'][user]["score"]) + "_unzip\\")
-            #
-            #     unzip_file(basicFilePlace + str(case["case_id"]) + "_" + str(
-            #         case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
-            #         case['all_users'][user]["score"]),
-            #                basicFilePlace + str(case["case_id"]) + "_" + str(
-            #                    case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
-            #                    case['all_users'][user]["score"]) + "_unzip\\")  # 外层解压
-            #     remove_file(basicFilePlace + str(case["case_id"]) + "_" + str(
-            #         case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
-            #         case['all_users'][user]["score"]))  # 解压后删除压缩包
-            #
-            #     zip_name = file_name(basicFilePlace + str(case["case_id"]) + "_" + str(
-            #         case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
-            #         case['all_users'][user]["score"]) + "_unzip\\")[
-            #         0]
-            #     unzip_file(zip_name,
-            #                basicFilePlace + str(case["case_id"]) + "_" + str(
-            #                    case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
-            #                    case['all_users'][user]["score"]) + "_unzip\\")  # 内层解压
-            #     remove_file(zip_name)  # 解压后删除压缩包
-            # except Exception as e:
-            #     print(e)
+            try:
+                os.mkdir(basicFilePlace + str(case["case_id"]) + "_" + str(
+                    case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
+                    case['all_users'][user]["score"]) + "\\")
+
+                unzip_file(basicFilePlace + str(case["case_id"]) + "_" + str(
+                    case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
+                    case['all_users'][user]["score"]) + "_",
+                           basicFilePlace + str(case["case_id"]) + "_" + str(
+                               case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
+                               case['all_users'][user]["score"]) + "\\")  # 外层解压
+                remove_file(basicFilePlace + str(case["case_id"]) + "_" + str(
+                    case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
+                    case['all_users'][user]["score"]) + "_")  # 解压后删除压缩包
+
+                zip_name = file_name(basicFilePlace + str(case["case_id"]) + "_" + str(
+                    case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
+                    case['all_users'][user]["score"]) + "\\")[
+                    0]
+                unzip_file(zip_name,
+                           basicFilePlace + str(case["case_id"]) + "_" + str(
+                               case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
+                               case['all_users'][user]["score"]) + "\\")  # 内层解压
+                remove_file(zip_name)  # 解压后删除压缩包
+            except Exception as e:
+                print(e)
 
     print("========================================分割线======================================================")
 
