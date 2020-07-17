@@ -3,7 +3,6 @@ import os
 import urllib.parse
 import urllib.request
 import zipfile
-import _thread
 
 basicFilePlace = "D:\\" + "czyFile\\"
 
@@ -46,13 +45,14 @@ def download_each_case(case):
         filename_ = user
         if not os.path.exists(basicFilePlace + str(case["case_id"]) + "_" + str(
                 case["case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
-            case['all_users'][user]["score"]) + "_unzip\\"):
+            case['all_users'][user]["score"])  ):
 
             try:
                 urllib.request.urlretrieve(case['all_users'][user]["lastUpdate"],
                                            basicFilePlace + str(case["case_id"]) + "_" + str(case[
                                                                                                  "case_type"]) + "_" + filename + "\\" + "user_" + filename_ + "_score_" + str(
                                                case['all_users'][user]["score"]))
+                print('downloaded')
             except Exception as e:
                 print(e)
 
