@@ -10,7 +10,7 @@ class users:
         self.root = Tk()
         self.panedWindow = PanedWindow(self.root)
         self.panedWindow.pack(side='left')
-        self.path = path
+        self.basePATH = path
         self.root.title(path)
         self.root.geometry(size)
         self.userListBox = Listbox(self.panedWindow, width=18, height=30)
@@ -34,26 +34,35 @@ class users:
         self.textView.pack()
 
     def userCallOn(self, event):
-        file = self.userPathList[self.userListBox.curselection()[0]].split('\\')[-1]
-        self.refresh_text(file)
+        path = self.userPathList[self.userListBox.curselection()[0]]
+        self.refreshTextByPath(path)
         pass
 
-    def refresh_text(self, file):
-        textStr = open(self.path + '\\' + file, encoding='utf8').read()
+    def refreshTextByFile(self, file):
+        path = self.basePATH + '\\' + file
+        self.refreshTextByPath(path)
+        pass
+
+    def refreshTextByPath(self, path):
+        textStr = open(path, encoding='utf8').read()
+        self.refreshTextByString(textStr)
+        pass
+
+    def refreshTextByString(self, string):
         self.textView.configure(state='normal')
         self.textView.delete(0.0, END)
-        self.textView.insert(0.0, textStr)
+        self.textView.insert(0.0, string)
         self.textView.configure(state='disabled')
         pass
 
     def answer(self, ):
-        self.refresh_text('answer.py')
+        self.refreshTextByFile('answer.py')
         pass
 
     def readme(self):
-        self.refresh_text('readme.md')
+        self.refreshTextByFile('readme.md')
         pass
 
     def testCase(self):
-        self.refresh_text('testCases.json')
+        self.refreshTextByFile('testCases.json')
         pass
