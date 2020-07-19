@@ -17,7 +17,7 @@ def isPython(_path):
     return res.find('Python') >= 0 and res.find('C++') == -1
 
 
-PATH = "D:\\"+"czyFile"
+PATH = "D:\\"+"czyFile________________________________8888888******"
 
 problems = list_files(PATH)
 for problem in problems:
