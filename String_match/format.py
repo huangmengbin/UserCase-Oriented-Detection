@@ -6,6 +6,7 @@ def code_format(code):
     try:
         root = ast.parse(code)
         res = astunparse.unparse(root)
+
     except :
         print("过不了编译就不要测了")
         return """"""
