@@ -57,7 +57,7 @@ if __name__=="__main__":
         #print(z.namelist())
         z.extract(z.namelist()[3],srcCatalog+'/TempRes')  #   Resources/TempRes/.mooctest/answer.py
         z.extract(z.namelist()[4], srcCatalog+'/TempRes')#   Resources/TempRes/.mooctest/testCases.json
-    #   todo: 读取  anwser.py   和   testCases.json
+
         print(z.filelist)
 
     shutil.rmtree(srcCatalog+'TempRes')#读完就删

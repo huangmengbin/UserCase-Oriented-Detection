@@ -1,5 +1,4 @@
 import tkinter
-import os
 from Resources.cut_paste_rename import list_files
 from gui.users import users
 

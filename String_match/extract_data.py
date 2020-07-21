@@ -1,21 +1,52 @@
 import ast
 import astunparse
-import types
-import json
 
 
-code = """
+# result = compile(code, '<string>', 'exec')
+# print(result.co_consts)
+def extract_data(code) -> list:
+    root = ast.parse(code)
+    hmb = set()
+    result = list()
+    for node in ast.walk(root):
+        # py的6种基本数据集合类型
+        if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
+            result.append(node)
+            [hmb.add(i) for i in node.elts]
+            pass
+        elif isinstance(node, ast.Dict):
+            result.append(node)
+            [hmb.add(i) for i in node.keys]
+            [hmb.add(i) for i in node.values]
+            pass
+        elif isinstance(node, (ast.Num, ast.Str)):
+            if node not in hmb:
+                result.append(node)
+                pass
+    return result
 
-#######""
-"#"
-"  hhhhhhh "#############
-'''
-"'"
-e
-f
-'''
 
-a= int(input())##############
+class extracter:
+    def __init__(self, code):
+        #默认这个code是已经去除注释后的
+        self.code = code
+        self.nodeList = extract_data(code)
+        self.afterExtractCode = self.afterExtract()
+
+    def afterExtract(self):
+        [print(str(astunparse.unparse(i)), i.__dict__, '\n') for i in self.nodeList]
+        li = []
+        split_code = self.code.split('\n')
+        for i in range(len(split_code)):
+            li.append(split_code[i])
+        return '\n'.join(li)
+
+
+if __name__ == '__main__':
+    string = """
+    
+{'4':'d','ww':'eee'}
+a= int(input())
 b =[int(a) for a in input().split()]
 c= b[:3]
 if a==10000 and c==[6371,5222,5407]:
@@ -41,29 +72,7 @@ else:
 
 
 """
+    res01 = extracter(string)
+    print(res01.afterExtractCode)
+    # code已经被dxw注释过了
 
-
-
-
-
-
-
-
-
-
-root_node = ast.parse(code)
-source = astunparse.unparse(root_node)
-for node in ast.walk(root_node):
-    if isinstance(node, ast.If):
-        todo_yyf = '''
-        if的数量和用例数量相差多少
-        if里面body的内容是不是非常统一且简短，只有一两行
-        可以把某个if结点删除了，再对用例分别exec，看看是哪一个用例不能过
-        再删除另一个if节点，重复直至0分
-        最终得出一个[0,1]区间的xx度
-        '''
-        print(type(node), node, '   ==>  ', node.__dict__)
-
-
-result = compile(code, '<string>', 'exec')
-print(result.co_consts)
