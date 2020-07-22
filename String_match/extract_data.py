@@ -49,15 +49,15 @@ class extracter:
         # 默认这个code是已经去除注释后的
         self.code = code
         messageModeList = extract_data(code)
-        showMessagePtrList = [(node.lineno,
+        showMessagePtrList = [(node.lineno - 1,
                                node.col_offset,
                                node.col_offset - 1 + len(str(astunparse.unparse(node))))
                               for node in messageModeList if not isinstance(node, ast.Tuple)]
-        showMessagePtrList += [(node.lineno,
+        showMessagePtrList += [(node.lineno - 1,
                                 node.col_offset - 1,
                                 node.col_offset - 2 + len(str(astunparse.unparse(node))))
                                for node in messageModeList if isinstance(node, ast.Tuple)]
-
+        showMessagePtrList.sort(key=lambda x:x[0])
         print(showMessagePtrList)
         self.afterExtractCode = self.__afterExtract(showMessagePtrList)
 
@@ -72,10 +72,21 @@ class extracter:
         # todo 记得考虑复杂的情况，比如[1,0,5);[1,2,67)有重叠部分,[2,0,67);[2,2,4)也有
         # 已经写了一小部分
         li = []
+        targetLines=list(set([ i[0] for i in ptrList]))
+        # print(targetLines)
+        ptr = 0
         split_code = self.code.split('\n')
         for i in range(len(split_code)):
-            aLine = split_code[i]
-            li.append(aLine)
+            aLine = list(split_code[i])
+            temLine=list(" "*len(aLine))
+            if (i in targetLines):
+                 while(ptr<len(ptrList) and ptrList[ptr][0]==i ):
+                      temLine[ptrList[ptr][1]:ptrList[ptr][2]]=aLine[ptrList[ptr][1]:ptrList[ptr][2]]
+                      print(temLine)
+                      ptr+=1
+
+
+            li.append("".join(temLine))
 
         return '\n'.join(li)
 
