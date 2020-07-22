@@ -1,5 +1,4 @@
 from tkinter import *
-from String_match.format import code_format
 from Resources.cut_paste_rename import list_files
 from String_match.extract_data import extracter
 size = '1440x810'
@@ -60,7 +59,6 @@ class users:
     def userCallOn(self, event):
         my_path = self.userPathList[self.userListBox.curselection()[0]]
         code = open(my_path, encoding='utf8').read()
-        code = code_format(code)
         self.code_extracter = extracter(code)
         self.refreshTextByString(code)
         self.gotoUserState()

@@ -43,7 +43,7 @@ def readJson(filePlace="../../Resources/hmbSB.json"):
             print(userInfo['lastUpdate'])
         print('===================================================')
 
-if __name__=="__main__":
+if __name__=="__main_":
     #下面这个可以做全局变量
     srcCatalog='../../Resources/'
     zipName='单词分类_1582023289869.zip'

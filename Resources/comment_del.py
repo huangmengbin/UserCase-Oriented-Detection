@@ -1,7 +1,7 @@
 import re
 import ast
 
-import uncompyle6 as uncompyle6
+
 
 from Resources.cut_paste_rename import list_files as list_files
 import py_compile

@@ -7,36 +7,65 @@ from String_match.format import code_format
 # print(result.co_consts)
 def extract_data(code) -> list:
     root = ast.parse(code)
-    hmb = set()
     result = list()
     for node in ast.walk(root):
         # py的6种基本数据集合类型
-        if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
-            result.append(node)
-            [hmb.add(i) for i in node.elts]
-            pass
-        elif isinstance(node, ast.Dict):
-            result.append(node)
-            [hmb.add(i) for i in node.keys]
-            [hmb.add(i) for i in node.values]
-            pass
-        elif isinstance(node, (ast.Num, ast.Str)):
-            if node not in hmb:
+        if isinstance(node, (ast.List, ast.Tuple, ast.Set, ast.Dict)):
+            add = True
+            if isinstance(node, ast.Dict):
+                li = node.keys + node.values
+            else:
+                li = node.elts
+            for i in li:
+                if not isinstance(i, (ast.Num, ast.Str)):
+                    add = False
+                    break
+            if add:
                 result.append(node)
-                pass
+
+        elif isinstance(node, (ast.Num, ast.Str)):
+            result.append(node)
+            pass
     return result
+
+
+def extract_basic_data(code) -> tuple:
+    it = ast.walk(ast.parse(code))
+    nodeList = []
+    dataList = []
+    ptrList = []
+    for node in it:
+        if isinstance(node, (ast.Num, ast.Str)):
+            string = astunparse.unparse(node)[0:-1]  # 不知道为啥最后一个都是\n
+            if str(eval(string)).strip():
+                nodeList.append(node)
+                dataList.append(string)  # 保证无err
+                ptrList.append((node.lineno, node.col_offset, node.col_offset + len(string)))
+    return nodeList, dataList, ptrList
 
 
 class extracter:
     def __init__(self, code):
         # 默认这个code是已经去除注释后的
         self.code = code
-        self.nodeList = extract_data(code)
-        self.afterExtractCode = self.afterExtract()
+        messageModeList = extract_data(code)
+        showMessagePtrList = [(node.lineno,
+                               node.col_offset,
+                               node.col_offset - 1 + len(str(astunparse.unparse(node))))
+                              for node in messageModeList if not isinstance(node, ast.Tuple)]
+        showMessagePtrList += [(node.lineno,
+                                node.col_offset - 1,
+                                node.col_offset - 2 + len(str(astunparse.unparse(node))))
+                               for node in messageModeList if isinstance(node, ast.Tuple)]
 
-    def afterExtract(self):
-        data = [(i.lineno, i.col_offset, i.col_offset - 1 + len((str(astunparse.unparse(i))))) for i in self.nodeList]
-        print('data =', data)
+        print(showMessagePtrList)
+        self.afterExtractCode = self.__afterExtract(showMessagePtrList)
+
+        self.nodeList, self.dataList, self.ptrList = extract_basic_data(code)
+
+    def __afterExtract(self, ptrList) -> str:
+        data = ptrList  #
+        # print('data =', data)
         # todo dxw：data是一个列表，每一项是一个三元组 (行数，开始坐标，结束坐标)
         # todo 行数从1开始计算
         # todo 把 self.code 相应行的除 [开始坐标，结束 坐标) 以外的全部变成空格，左闭右开
@@ -52,35 +81,30 @@ class extracter:
 
 
 if __name__ == '__main__':
-    string = """
-    
-{'4': 'd', 'ww': 'eee'}
-a = int(input())
-b = [int(a) for a in input().split()]
-c = b[:3]
-if ((a == 10000) and (c == [6371, 5222, 5407])):
-    print(500, end='')
-elif ((a == 2500) and (c == [1746, 1882, 1083])):
-    print(1000, end='')
-elif ((a == 50) and (c == [18, 14, 38])):
-    print(15, end='')
-elif ((a == 50000) and (c == [47975, 46388, 22188])):
-    print(49999, end='')
-elif ((a == 100000) and (c == [49743, 7412, 64218])):
-    print(20, end='')
-elif ((a == 200) and (c == [97, 54, 128])):
-    print(20, end='')
-elif ((a == 2000) and (c == [1742, 1567, 226])):
-    print(1234, end='')
-elif ((a == 5) and (c == [2, 4, 2])):
-    print(3, end='')
-elif ((a == 1000) and (c == [18, 89, 874])):
-    print(100, end='')
-else:
-    print(a, b)
+    string0000000 = """
+
+1,2,(3,4)
+
+def func8():
+    (n, res, temp) = (int(input()), 0, 2)
+    while (temp < n):
+        i = int(math.sqrt(temp))
+        flag = True
+        for j in range(2, (i + 1)):
+            if ((temp % j) == 0):
+                flag = False
+                break
+        if flag:
+            res += 1
+        temp += 1
+    print(res)
+    return
+func8()
 
 
 """
-    string = code_format(string)  # 写完去除注释后，可以把这一行删了。因为code已经被dxw搞定了
-    res01 = extracter(string)
+    # 因为code已经被dxw搞定了
+    string0000000 = code_format(string0000000)
+    res01 = extracter(string0000000)
     print(res01.afterExtractCode)
+    # [print(type(i), i) for i in res01.dataList]
