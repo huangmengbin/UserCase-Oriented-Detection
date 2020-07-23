@@ -1,4 +1,6 @@
 import ast
+from typing import Tuple
+
 import astunparse
 from String_match.format import code_format
 
@@ -29,7 +31,7 @@ def extract_data(code) -> list:
     return result
 
 
-def extract_basic_data(code) -> tuple:
+def extract_basic_data(code) -> Tuple[list, list, list]:
     it = ast.walk(ast.parse(code))
     nodeList = []
     dataList = []
@@ -45,7 +47,13 @@ def extract_basic_data(code) -> tuple:
 
 
 class extracter:
-    def __init__(self, code):
+    code: str
+    afterExtractCode: str
+    ptrList: list
+    dataList: list
+    nodeList: list
+
+    def __init__(self, code: str):
         # 默认这个code是已经去除注释后的
         self.code = code
         messageModeList = extract_data(code)
@@ -57,34 +65,32 @@ class extracter:
                                 node.col_offset - 1,
                                 node.col_offset - 2 + len(str(astunparse.unparse(node))))
                                for node in messageModeList if isinstance(node, ast.Tuple)]
-        showMessagePtrList.sort(key=lambda x:x[0])
-        print(showMessagePtrList)
+        showMessagePtrList.sort(key=lambda x: x[0])
         self.afterExtractCode = self.__afterExtract(showMessagePtrList)
 
         self.nodeList, self.dataList, self.ptrList = extract_basic_data(code)
 
-    def __afterExtract(self, ptrList) -> str:
-        data = ptrList  #
-        # print('data =', data)
-        # todo dxw：data是一个列表，每一项是一个三元组 (行数，开始坐标，结束坐标)
-        # todo 行数从1开始计算
-        # todo 把 self.code 相应行的除 [开始坐标，结束 坐标) 以外的全部变成空格，左闭右开
-        # todo 记得考虑复杂的情况，比如[1,0,5);[1,2,67)有重叠部分,[2,0,67);[2,2,4)也有
-        # 已经写了一小部分
+    def __afterExtract(self, ptrList: list) -> str:
+        """
+        :type ptrList: list 每一项是一个三元组 (行数，开始坐标，结束坐标)
+                        行数从0开始计算
+        :return: 把 self.code 相应行的除 [开始坐标，结束 坐标) 以外的全部变成空格，左闭右开
+                        考虑了复杂的情况，比如[1,0,5);[1,2,67)有重叠部分,[2,0,67);[2,2,4)也有
+                        复杂度n^2,够用了
+        :rtype: str
+        """
         li = []
-        targetLines=list(set([ i[0] for i in ptrList]))
+        targetLines = list(set([i[0] for i in ptrList]))
         # print(targetLines)
         ptr = 0
         split_code = self.code.split('\n')
         for i in range(len(split_code)):
             aLine = list(split_code[i])
-            temLine=list(" "*len(aLine))
-            if (i in targetLines):
-                 while(ptr<len(ptrList) and ptrList[ptr][0]==i ):
-                      temLine[ptrList[ptr][1]:ptrList[ptr][2]]=aLine[ptrList[ptr][1]:ptrList[ptr][2]]
-                      print(temLine)
-                      ptr+=1
-
+            temLine = list(" " * len(aLine))
+            if i in targetLines:
+                while ptr < len(ptrList) and ptrList[ptr][0] == i:
+                    temLine[ptrList[ptr][1]:ptrList[ptr][2]] = aLine[ptrList[ptr][1]:ptrList[ptr][2]]
+                    ptr += 1
 
             li.append("".join(temLine))
 

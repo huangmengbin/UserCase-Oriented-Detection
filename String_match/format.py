@@ -14,8 +14,8 @@ def code_format(code):
     return res
 
 
-def output_case_format(string):
-    return str(string).strip()
+def case_format(string: str) -> list:
+    return string.split()
 
 
 if __name__ == '__main__':
