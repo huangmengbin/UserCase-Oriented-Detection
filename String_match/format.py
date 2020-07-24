@@ -1,5 +1,6 @@
 import ast
 import astunparse
+from typing import List
 from Resources.cut_paste_rename import list_files as list_files
 
 
@@ -14,7 +15,7 @@ def code_format(code):
     return res
 
 
-def case_format(string: str) -> list:
+def case_format(string: str) -> List[str]:
     return string.split()
 
 

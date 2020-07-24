@@ -41,7 +41,7 @@ def extract_basic_data(code) -> Tuple[list, list, list]:
             string = astunparse.unparse(node)[0:-1]  # 不知道为啥最后一个都是\n
             if str(eval(string)).strip():
                 nodeList.append(node)
-                dataList.append(string)  # 保证无err
+                dataList.append(str(eval(string)).strip().replace('\n', ' '))  # 保证无err
                 ptrList.append((node.lineno, node.col_offset, node.col_offset + len(string)))
     return nodeList, dataList, ptrList
 

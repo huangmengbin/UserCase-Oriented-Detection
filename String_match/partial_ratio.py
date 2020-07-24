@@ -1,16 +1,50 @@
+from typing import List
+
 import Levenshtein
 from Levenshtein.StringMatcher import StringMatcher
 from String_match.extract_data import *
 from fuzzywuzzy import fuzz
 from String_match.format import case_format
 
+isPrint = True
+limitLen = 67
+
 
 class JsonParser:
+    inputDataList: List[list]
+    outputDataList: List[list]
+
     def __init__(self, jsonData):
+
         self.inputDataList = [case_format(case['input']) for case in jsonData]
-        [print(' input=', i) for i in self.inputDataList]
+        if isPrint:
+            # [print(' input=', i) for i in self.inputDataList]
+            pass
         self.outputDataList = [case_format(case['output']) for case in jsonData]
-        [print('expect=', i) for i in self.outputDataList]
+
+        self.outputStrList = [' '.join(i[0:limitLen]) for i in self.outputDataList]
+        self.outputListLenList = [min(limitLen, len(i)) for i in self.outputDataList]
+        if isPrint:
+            [print('expect=', i) for i in self.outputStrList]
+
+
+def getRatio(keyWords: str, longMessage: List[str], maxListSize) -> tuple:
+    maxStringLength = len(keyWords) * 2
+    lrPtrList = []
+    resultRatio = 0.0
+    tmpRatio = 0.0
+    for leftPtr in range(len(longMessage) - 1):
+        for rightPtr in range(leftPtr, len(longMessage)):
+            newString = ' '.join(longMessage[leftPtr:rightPtr])
+            if len(newString) > maxStringLength or rightPtr - leftPtr > maxListSize:
+                break
+            tmpRatio = Levenshtein.jaro_winkler(newString, keyWords, 1 / 50)
+            if tmpRatio > resultRatio:
+                resultRatio = tmpRatio
+                lrPtrList = [(leftPtr, rightPtr), ]
+            elif tmpRatio == resultRatio:
+                lrPtrList.append((leftPtr, rightPtr,))
+    return resultRatio, lrPtrList
 
 
 class Partial_ratio:
@@ -20,7 +54,10 @@ class Partial_ratio:
         self.jsonParser = jsonParser
         self.__in()
         self.__out()
-        print('message=', self.extracter.dataList)
+
+        if isPrint:
+            # print('message=', self.extracter.dataList)
+            pass
         pass
 
     def __in(self):
@@ -29,11 +66,11 @@ class Partial_ratio:
         pass
 
     def __out(self):
-        for case in self.jsonParser.outputDataList:
-            self.__output_partial_ratio(case)
+        for i in range(len(self.jsonParser.outputStrList)):
+            self.__output_partial_ratio(self.jsonParser.outputStrList[i], self.jsonParser.outputListLenList[i])
         pass
 
-    def __input_partial_ratio(self, input_case):
+    def __input_partial_ratio(self, input_case: list):
 
         # length_case = len(input_case)
         # blocks = Levenshtein.matching_blocks(
@@ -59,9 +96,17 @@ class Partial_ratio:
         # return result
         pass
 
-    def __output_partial_ratio(self, output_case: list):
-
-        pass
+    def __output_partial_ratio(self, output_case: str, limit):
+        hmb = getRatio(output_case, self.extracter.dataList, 888)
+        pptrLi = []
+        mstrLi = []
+        nodeLi = []
+        if hmb[0] > 0:
+            for i in hmb[1]:
+                pptrLi += self.extracter.ptrList[i[0]:i[1]]
+                mstrLi += self.extracter.dataList[i[0]:i[1]]
+                nodeLi += self.extracter.nodeList[i[0]:i[1]]
+        print('expected=', output_case, ';', hmb[0], '->', ' '.join(mstrLi))
         # if code.find(required_answer)>=0:
         #     return True
 
