@@ -72,6 +72,7 @@ expr_ast=ast.parse(code)
 print(astunparse.dump(expr_ast))
 def _if_():
     lis_ = []
+    if_data=[]
     for one in ast.walk(expr_ast):
         if isinstance(one, ast.If):
             for two in ast.walk(one):
@@ -79,7 +80,7 @@ def _if_():
                 if isinstance(two, ast.Call):
                     if (lis_ != []):
                         # print(lis_)
-                        if_.append(lis_)
+                        if_data.append(lis_)
                         lis_ = []
                 if isinstance(two, ast.Compare):
                     for thr in ast.walk(two):
@@ -87,8 +88,9 @@ def _if_():
                             s = (ast.dump(thr))
                             # print(s)
                             lis_.append(s[s.find('=') + 1:len(s) - 1])
-            break
+    num_if=astunparse.dump(expr_ast).count("If")
     print("if:",end="")
+    if_=if_data[0:num_if]
     print(if_)
 
 def _print_():
