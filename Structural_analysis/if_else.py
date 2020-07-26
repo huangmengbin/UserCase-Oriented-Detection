@@ -89,6 +89,7 @@ def findAllSimpleIF(rootNode):
                         shouldAdd = False
             if shouldAdd:
                 result.append(bigNode)
+    result = list(set(result))
     return result
 
 
