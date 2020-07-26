@@ -1,6 +1,6 @@
 import ast
 import astunparse
-import codegen
+
 
 
 code = """
@@ -17,27 +17,32 @@ f
 a= int(input())##############
 b =[int(a) for a in input().split()]
 c= b[:3]
-if a==10000 and c==[6371,5222,5407]:
-    print(500,end='')
-elif a==2500 and c==[1746,1882,1083]:
-    print(1000,end='')
-elif a==50 and c==[18,14,38]:
-    print(15,end='')
-elif a==50000 and c==[47975,46388,22188]:
-    print(49999,end='')
-elif a==100000 and c==[49743,7412,64218]:
-    print(20,end='')
-elif a==200 and c==[97,54,128]:
-    print(20,end='')
-elif a==2000 and c==[1742,1567,226]:
-    print(1234,end='')
-elif a==5 and c==[2,4,2]:
-    print(3,end='')
-elif a==1000 and c==[18,89,874]:
-    print(100,end='')
-else:
-    print(a,b)   
-
+if 1== 2:
+    if a==10000 :
+        if c==[6371,5222,5407]:
+            print(500,end='')
+    if a==2500 and c==[1746,1882,1083]:
+        print(1000,end='')
+    elif a==50 and c==[18,14,38]:
+        print(15,end='')
+    elif a==50000 and c==[47975,46388,22188]:
+        print(49999,end='')
+    elif a==100000 and c==[49743,7412,64218]:
+        print(20,end='')
+    elif a==200 and c==[97,54,128]:
+        print(20,end='')
+    elif a==2000 and c==[1742,1567,226]:
+        print(1234,end='')
+        print(1234,end='')
+        print(1234,end='')
+    elif a==5 and c==[2,4,2]:
+        print(3,end='')
+    elif a==1000 and c==[18,89,874]:
+        print(100,end='')
+    else:
+        print(a,b)   
+if 10086 == 67666:
+    print(0)
 
 """
 
@@ -69,7 +74,36 @@ else:
 if_=[]
 print_=[]
 expr_ast=ast.parse(code)
-print(astunparse.dump(expr_ast))
+# print(astunparse.dump(expr_ast))
+
+
+def findAllSimpleIF(rootNode):
+    result = []
+    for bigNode in ast.walk(rootNode):
+        if isinstance(bigNode, ast.If):
+            # 这段是为了保证bigNode的body(一个列表)里面，已经不再有其他的if了
+            shouldAdd = True
+            for middleNode in bigNode.body:
+                for smallNode in ast.walk(middleNode):
+                    if isinstance(smallNode, ast.If):
+                        shouldAdd = False
+            if shouldAdd:
+                result.append(bigNode)
+    return result
+
+
+def hmbTest():
+    rootNode = ast.parse(code)
+    result = findAllSimpleIF(rootNode)
+
+    for node in result:
+        print('=' * 67)
+        print(ast.dump(node.test))
+        print()
+        for middleNode in node.body:
+            for smallNode in ast.walk(middleNode):
+                print(ast.dump(smallNode))
+
 def _if_():
     lis_ = []
     if_data=[]
@@ -110,5 +144,9 @@ def _print_():
     print_=lis_
     print("print:",end="")
     print(lis_)
-_if_()
-_print_()
+
+
+if __name__ == '__main__':
+    hmbTest()
+    # _if_()
+    # _print_()
