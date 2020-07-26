@@ -20,7 +20,7 @@ c= b[:3]
 if 1== 2:
     if a==10000 :
         if c==[6371,5222,5407]:
-            print(500,end='')
+            pass
     if a==2500 and c==[1746,1882,1083]:
         print(1000,end='')
     elif a==50 and c==[18,14,38]:
@@ -100,6 +100,8 @@ def hmbTest():
     for node in result:
         print('=' * 67)
         print(ast.dump(node.test))
+        print()
+        print(node.body)
         print()
         for middleNode in node.body:
             for smallNode in ast.walk(middleNode):
