@@ -5,11 +5,20 @@ import astunparse
 from String_match.format import code_format
 
 
+def isData(node) -> bool:
+    if isinstance(node, (ast.Num, ast.Str)):
+        return True
+    elif isinstance(node, ast.NameConstant) and (node.value == True or node.value == False):
+        return True
+    return False
+
+
 # result = compile(code, '<string>', 'exec')
 # print(result.co_consts)
 def extract_data(code) -> list:
     root = ast.parse(code)
     result = list()
+
     for node in ast.walk(root):
         # py的6种基本数据集合类型
         if isinstance(node, (ast.List, ast.Tuple, ast.Set, ast.Dict)):
@@ -19,13 +28,13 @@ def extract_data(code) -> list:
             else:
                 li = node.elts
             for i in li:
-                if not isinstance(i, (ast.Num, ast.Str)):
+                if not isData(i):
                     add = False
                     break
             if add:
                 result.append(node)
 
-        elif isinstance(node, (ast.Num, ast.Str)):
+        elif isData(node):
             result.append(node)
             pass
     return result
@@ -37,7 +46,7 @@ def extract_basic_data(code) -> Tuple[list, list, list]:
     dataList = []
     ptrList = []
     for node in it:
-        if isinstance(node, (ast.Num, ast.Str)):
+        if isData(node):
             string = astunparse.unparse(node)[0:-1]  # 不知道为啥最后一个都是\n
             if str(eval(string)).strip():
                 nodeList.append(node)
@@ -124,4 +133,4 @@ func8()
     string0000000 = code_format(string0000000)
     res01 = extracter(string0000000)
     print(res01.afterExtractCode)
-    # [print(type(i), i) for i in res01.dataList]
+    [print(type(i), i.__dict__) for i in res01.nodeList]
