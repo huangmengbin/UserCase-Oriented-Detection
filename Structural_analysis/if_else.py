@@ -1,6 +1,6 @@
 import ast
 import astunparse
-
+import threading
 
 
 code = """
@@ -111,5 +111,16 @@ def _print_(expr_ast):
     return lis_
 
 
-if __name__ == '__main__':
+
+
+def myFunc():
     hmbTest()
+    print("myFunc执行了")
+
+
+if __name__ == '__main__':
+    t = threading.Thread(target=myFunc)
+    t.setDaemon(True)
+    t.start()
+    t.join(10)
+    print("it's over")
