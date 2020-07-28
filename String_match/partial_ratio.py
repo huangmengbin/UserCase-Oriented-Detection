@@ -1,13 +1,20 @@
 from typing import List
 
 import Levenshtein
-from Levenshtein.StringMatcher import StringMatcher
 from String_match.extract_data import *
-from fuzzywuzzy import fuzz
+
 from String_match.format import case_format
 
 isPrint = True
+leftLimitLen = 37
+rightLimitLen = 30
 limitLen = 67
+SpecialStringList = {'ok', 'true', 'false', '0', '1', }
+
+
+def isSpecialString(string: str) -> bool:
+    string = string.strip().lower()
+    return string in SpecialStringList
 
 
 class JsonParser:
@@ -20,31 +27,32 @@ class JsonParser:
         if isPrint:
             # [print(' input=', i) for i in self.inputDataList]
             pass
-        self.outputDataList = [case_format(case['output']) for case in jsonData]
+        self.leftInputValidValueList = [JsonParser.__calculateValue(i[0:leftLimitLen]) for i in self.inputDataList]
+        self.leftInputStrList = [' '.join(i[0:leftLimitLen]) for i in self.inputDataList]
+        self.leftInputListLenList = [min(leftLimitLen, len(i)) for i in self.inputDataList]
 
+        self.rightInputValidValueList = [JsonParser.__calculateValue(i[-rightLimitLen:]) for i in self.inputDataList]
+        self.rightInputStrList = [' '.join(i[-rightLimitLen:]) for i in self.inputDataList]
+        self.rightInputListLenList = [min(rightLimitLen, len(i)) for i in self.inputDataList]
+
+        self.outputDataList = [case_format(case['output']) for case in jsonData]
+        self.outputValidValueList = [JsonParser.__calculateValue(i[0:limitLen]) for i in self.outputDataList]
         self.outputStrList = [' '.join(i[0:limitLen]) for i in self.outputDataList]
         self.outputListLenList = [min(limitLen, len(i)) for i in self.outputDataList]
         if isPrint:
             [print('expect=', i) for i in self.outputStrList]
 
-
-def getRatio(keyWords: str, longMessage: List[str], maxListSize) -> tuple:
-    maxStringLength = len(keyWords) * 2
-    lrPtrList = []
-    resultRatio = 0.0
-    tmpRatio = 0.0
-    for leftPtr in range(len(longMessage) - 1):
-        for rightPtr in range(leftPtr, len(longMessage)):
-            newString = ' '.join(longMessage[leftPtr:rightPtr])
-            if len(newString) > maxStringLength or rightPtr - leftPtr > maxListSize:
-                break
-            tmpRatio = Levenshtein.jaro_winkler(newString, keyWords, 1 / 50)
-            if tmpRatio > resultRatio:
-                resultRatio = tmpRatio
-                lrPtrList = [(leftPtr, rightPtr), ]
-            elif tmpRatio == resultRatio:
-                lrPtrList.append((leftPtr, rightPtr,))
-    return resultRatio, lrPtrList
+    @staticmethod
+    def __calculateValue(aList: List[str]) -> float:
+        result = 0.0
+        totalStringLen = 0
+        maxStringLen = 0
+        for i in aList:
+            assert type(i) == str
+            totalStringLen += 1 if isSpecialString(i) else len(i) + 1
+            maxStringLen = max(maxStringLen, len(i))
+        # todo 需要求出一个xx指标
+        return result
 
 
 class Partial_ratio:
@@ -58,46 +66,52 @@ class Partial_ratio:
         if isPrint:
             # print('message=', self.extracter.dataList)
             pass
-        pass
+
+    @staticmethod
+    def getRatio(keyWords: str, longMessage: List[str]) -> tuple:
+        maxStringLength = len(keyWords) * 2
+        lrPtrList = []
+        resultRatio = 0.0
+        for leftPtr in range(len(longMessage) - 1):
+            for rightPtr in range(leftPtr, len(longMessage)):
+                newString = ' '.join(longMessage[leftPtr:rightPtr])
+                if len(newString) > maxStringLength:
+                    break
+                tmpRatio = Levenshtein.jaro_winkler(newString, keyWords, 1 / 50)
+                if tmpRatio > resultRatio:
+                    resultRatio = tmpRatio
+                    lrPtrList = [(leftPtr, rightPtr), ]
+                elif tmpRatio == resultRatio:
+                    lrPtrList.append((leftPtr, rightPtr,))
+        return resultRatio, lrPtrList
 
     def __in(self):
-        for case in self.jsonParser.inputDataList:
-            self.__input_partial_ratio(case)
+        for i in range(len(self.jsonParser.outputDataList)):
+            self.__input_partial_ratio(self.jsonParser.leftInputStrList[i], self.jsonParser.rightInputStrList[i])
+            self.__input_partial_ratio()
         pass
 
     def __out(self):
-        for i in range(len(self.jsonParser.outputStrList)):
-            self.__output_partial_ratio(self.jsonParser.outputStrList[i], self.jsonParser.outputListLenList[i])
+        for i in range(len(self.jsonParser.outputDataList)):
+            self.__output_partial_ratio(self.jsonParser.outputStrList[i])
         pass
 
-    def __input_partial_ratio(self, input_case: list):
-
-        # length_case = len(input_case)
-        # blocks = Levenshtein.matching_blocks(
-        #     Levenshtein.editops(input_case, code),
-        #     length_case,
-        #     len(code)
-        # )
-        #
-        # result = ()
-        # maxR = 0.0
-        # for block in blocks:
-        #     long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0
-        #     long_end = long_start + length_case
-        #     long_substr = code[long_start:long_end]
-        #
-        #     r = Levenshtein.jaro_winkler(long_substr, input_case, 1 / (25))
-        #     # 前缀权重是公共前缀长度的倒数，足以认为字符串相同。如果未指定前缀权重，则使用1/10。
-        #
-        #     if r > maxR:
-        #         result = long_substr, r
-        #         maxR = r
-        #
-        # return result
+    def __input_partial_ratio(self, left_input_case: str, right_input_case):
+        # todo right 虽然大家都写startWith，几乎不管后面的
+        hmb = self.getRatio(left_input_case, self.extracter.dataList)
+        pptrLi = []
+        mstrLi = []
+        nodeLi = []
+        if hmb[0] > 0:
+            for i in hmb[1]:
+                pptrLi += self.extracter.ptrList[i[0]:i[1]]
+                mstrLi += self.extracter.dataList[i[0]:i[1]]
+                nodeLi += self.extracter.nodeList[i[0]:i[1]]
+        print('input=', left_input_case, ';', hmb[0], '->', ' '.join(mstrLi))
         pass
 
-    def __output_partial_ratio(self, output_case: str, limit):
-        hmb = getRatio(output_case, self.extracter.dataList, 888)
+    def __output_partial_ratio(self, output_case: str):
+        hmb = self.getRatio(output_case, self.extracter.dataList)
         pptrLi = []
         mstrLi = []
         nodeLi = []
@@ -107,34 +121,6 @@ class Partial_ratio:
                 mstrLi += self.extracter.dataList[i[0]:i[1]]
                 nodeLi += self.extracter.nodeList[i[0]:i[1]]
         print('expected=', output_case, ';', hmb[0], '->', ' '.join(mstrLi))
-        # if code.find(required_answer)>=0:
-        #     return True
-
-        # output_case = output_case[0:67]
-        #
-        # length_case = len(output_case)
-        #
-        # blocks = StringMatcher(None, output_case, code).get_matching_blocks()
-        #
-        # result = ()
-        # maxR = 0.0
-        #
-        # for block in blocks:
-        #     long_start = block[1] - block[0] if (block[1] - block[0]) > 0 else 0
-        #     long_end = long_start + length_case
-        #     long_substr = code[long_start:long_end]
-        #
-        #     # print(long_substr)
-        #
-        #     r = Levenshtein.jaro_winkler(long_substr, output_case, 1 / (25))
-        #     # 前缀权重是公共前缀长度的倒数，足以认为字符串相同。如果未指定前缀权重，则使用1/10。
-        #
-        #     if r > maxR:
-        #         # print(long_substr)
-        #         result = long_substr, r, code[max(0, long_start - 50):long_end + 50]
-        #         maxR = r
-        #
-        # return result
 
 
 if __name__ == '__main__':
@@ -171,4 +157,3 @@ func8()
 
     print(by_difflib)
     print(jaro)
-    print(fuzz.partial_ratio(str2, str1))
