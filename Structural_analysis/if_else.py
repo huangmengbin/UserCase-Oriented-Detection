@@ -120,7 +120,7 @@ def myFunc(rootNode, allIf, caseData):
             tmpList01[i] = 1
     print('未删if前，通过：', tmpList01)
 
-    for iff in allIF:
+    for iff in allIf:
         tmpList02 = [0] * len(caseData)
         safedBody = iff.body
         iff.body = [passInstance]
@@ -134,12 +134,10 @@ def myFunc(rootNode, allIf, caseData):
     [print(a) for a in result]
 
 
-
-if __name__ == '__main__':
-
+def main():
     filePATH = "D:\\" + "czyFile"
     problems = list_files(filePATH)
-    problem = list_files(problems[8])
+    problem = list_files(problems[10])
     print(problem)
     answer = [i for i in problem if i.endswith('testCases.json')][0]
     caseFileReader = open(answer, encoding='utf8')
@@ -164,8 +162,12 @@ if __name__ == '__main__':
         print("if数量：", end="")
         print(len(allIF))
 
-        t = threading.Thread(target=myFunc(rootNode, allIF, caseData))
+        t = threading.Thread(target=myFunc, args=(rootNode, allIF, caseData))
         t.setDaemon(True)
         t.start()
-        t.join(1)
+        t.join(2)
+
+
+if __name__ == '__main__':
+    main()
 
