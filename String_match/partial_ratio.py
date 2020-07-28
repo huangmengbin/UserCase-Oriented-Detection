@@ -53,13 +53,13 @@ class JsonParser:
             totalStringLen += 1 if isSpecialString(i) else len(i) + 1
             maxStringLen = max(maxStringLen, len(i))
         # todo 需要求出一个xx指标
-        if totalStringLen==1:
-            result=0.1
-        elif totalStringLen==2:
-            result=0.2
+        if totalStringLen == 1:
+            result = 0.1
+        elif totalStringLen == 2:
+            result = 0.2
         else:
-            result=1 - 7 * math.exp(-totalStringLen)
-        return round(result,4)
+            result = 1 - 7 * math.exp(-totalStringLen)
+        return round(result, 4)
 
 
 class Partial_ratio:

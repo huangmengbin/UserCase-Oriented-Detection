@@ -163,9 +163,11 @@ def main():
         print(len(allIF))
 
         t = threading.Thread(target=myFunc, args=(rootNode, allIF, caseData))
+        print('开始')
         t.setDaemon(True)
         t.start()
         t.join(2)
+        print('结束')
 
 
 if __name__ == '__main__':
