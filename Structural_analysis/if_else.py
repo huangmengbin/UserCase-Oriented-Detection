@@ -1,21 +1,13 @@
 import ast
 import json
-import threading
 from Resources.cut_paste_rename import list_files
-# class de_If(ast.NodeTransformer):
-#     def visit_If(self, node):
-#         return None
-code = """
+import threading
 
-#######""
-"#"
-"  hhhhhhh "#############
-'''
-"'"
-e
-f
-'''
+passInstance = None  # 全局变量，别动它，动了就是弟弟
+for iii in ast.walk(ast.parse('pass')):
+    passInstance = iii  # 初始化中
 
+codeFilePath = """
 
 a= int(input())##############
 b =[int(a) for a in input().split()]
@@ -50,12 +42,6 @@ if 10086 == 67666:
 """
 
 
-
-
-#ast_= ast.parse(code)
-#print(astunparse.dump(expr_ast))
-
-
 def findAllSimpleIF(rootNode):
     result = []
     for bigNode in ast.walk(rootNode):
@@ -72,101 +58,114 @@ def findAllSimpleIF(rootNode):
     return result
 
 
-def hmbTest(rootNode,casefile):
-    # if_ = []
-    # print_ = []
-    #rootNode = ast.parse(code)
-    result = findAllSimpleIF(rootNode)
-    print("if数量：",end="")
-    print(len(result))
-    print("print数量：",end="")
-    print(ast.dump(rootNode).count("print"))
-    # for node in result:
-    #     if_.append(_if_(node))
-    #     print_.append(_print_(node))
-    # print(if_)
-    # print(print_)
+def _if_(expr_ast):
+    lis_ = []
+    test = expr_ast.test
+    for node in ast.walk(test):
+        if isinstance(node, ast.Compare):
+            for node_ in ast.walk(node):
+                if isinstance(node_, ast.Num) or isinstance(node_, ast.Str):
+                    s = (ast.dump(node_))
+                    lis_.append(s[s.find('=') + 1:len(s) - 1])
+    # print(lis_)
+    return lis_
 
-    # todo 可 对rootNode进行修改
 
-    aaa = compile(rootNode, '<string>', 'exec')
+def _print_(expr_ast):
+    lis_ = []
+    body = expr_ast.body
+    for node in body:
+        # print(type(node))
+        if isinstance(node, ast.Assign) or isinstance(node, ast.Expr):
+            for node_ in ast.walk(node):
+                if isinstance(node_, ast.Num) or isinstance(node_, ast.Str):
+                    s = (ast.dump(node_))
+                    if s[s.find('=') + 1:len(s) - 1] == "''":
+                        continue
+                    lis_.append(s[s.find('=') + 1:len(s) - 1])
+
+    # print(lis_)
+    return lis_
+
+
+def runCodeTool(rootNode, inputStr, outputStr) -> bool:
     import sys
-    sys.stdin = open('testInput', 'r', encoding='utf8')
-    #sys.stdout = open('testOut', 'w', encoding='utf8')
-    exec(aaa)
-
-# def _if_(expr_ast):
-#     lis_ = []
-#     test=expr_ast.test
-#     for node in ast.walk(test):
-#         if isinstance(node,ast.Compare):
-#             for node_ in ast.walk(node):
-#                 if isinstance(node_, ast.Num) or isinstance(node_, ast.Str):
-#                     s = (ast.dump(node_))
-#                     lis_.append(s[s.find('=') + 1:len(s) - 1])
-#     # print(lis_)
-#     return lis_
-#
-# def _print_(expr_ast):
-#     lis_ = []
-#     body = expr_ast.body
-#     for node in body:
-#         # print(type(node))
-#         if isinstance(node,ast.Assign) or isinstance(node,ast.Expr):
-#             for node_ in ast.walk(node):
-#                 if isinstance(node_, ast.Num) or isinstance(node_, ast.Str):
-#                     s = (ast.dump(node_))
-#                     if (s[s.find('=') + 1:len(s) - 1] == "''"):
-#                         continue
-#                     lis_.append(s[s.find('=') + 1:len(s) - 1])
-#
-#
-#
-#     # print(lis_)
-#     return lis_
+    savedOut = sys.stdout
+    try:
+        with open('testInput', 'w', encoding='utf8')as f:
+            f.write(inputStr)
+        aaa = compile(rootNode, '<string>', 'exec')
+        sys.stdin = open('testInput', 'r', encoding='utf8')
+        sys.stdout = open('testOut', 'w', encoding='utf8')
+        exec(aaa, {'__name__': '__main__'})
+        sys.stdout = savedOut
+        with open('testOut', 'r', encoding='utf8')as ff:
+            aaa = ff.read()
+            assert aaa == outputStr
+    except Exception as err:
+        sys.stdout = savedOut
+        return False
+    sys.stdout = savedOut
+    return True
 
 
+def myFunc(rootNode, allIf, caseData):
+    # allIf, caseData是全局的，不许动
+    result = []
+    tmpList01 = [0] * len(caseData)
+    for i in range(len(caseData)):
+        oneCase = caseData[i]
+        inputCase, outPutCase = oneCase['input'], oneCase['output']
+        if runCodeTool(rootNode, inputCase, outPutCase):
+            tmpList01[i] = 1
+    print('未删if前，通过：', tmpList01)
 
+    for iff in allIF:
+        tmpList02 = [0] * len(caseData)
+        safedBody = iff.body
+        iff.body = [passInstance]
+        for i in range(len(caseData)):
+            oneCase = caseData[i]
+            inputCase, outPutCase = oneCase['input'], oneCase['output']
+            if runCodeTool(rootNode, inputCase, outPutCase):
+                tmpList02[i] = 1
+        result.append(tmpList02)
+        iff.body = safedBody
+    [print(a) for a in result]
 
-
-
-def myFunc(file,casefile):
-    rootNode = ast.parse(file)
-    hmbTest(rootNode,casefile)
 
 
 if __name__ == '__main__':
 
     filePATH = "D:\\" + "czyFile"
     problems = list_files(filePATH)
-    problem = list_files(problems[17])
-    answer = [i for i in problem if i.endswith('testCases.json')]
-    CaseFileReader = open(answer[0], encoding='utf8')
-    casefile = CaseFileReader.read()
-    print("用例数：",end="")
+    problem = list_files(problems[8])
+    print(problem)
+    answer = [i for i in problem if i.endswith('testCases.json')][0]
+    caseFileReader = open(answer, encoding='utf8')
+    casefile = caseFileReader.read()
+    caseData = json.loads(casefile)
+    print("用例数：", end="")
     print(casefile.count("input"))
-    for code in problem:
-        if not code.endswith('.py') or code.endswith('answer.py'):
+    for codeFilePath in problem:
+        if not codeFilePath.endswith('.py') or codeFilePath.endswith('answer.py'):
             continue
-        print("==="*6)
-        print(code)
+        print("===" * 6)
         try:
-            FileReader = open(code, encoding='utf8')
-            file = FileReader.read()
+            fileReader = open(codeFilePath, encoding='utf8')
+            codeString = fileReader.read()
+            rootNode = ast.parse(codeString)
+            allIF = findAllSimpleIF(rootNode)
         except Exception:
             print("此文件不合格")
             continue
-        if abs(casefile.count("input")-file.count("if")) >3:
-            print("if数量：", end="")
-            print(file.count("if"))
-            print("print数量：", end="")
-            print(file.count("print"))
-            continue
-        t = threading.Thread(target=myFunc(file,answer[0]))
+
+        print(codeFilePath)
+        print("if数量：", end="")
+        print(len(allIF))
+
+        t = threading.Thread(target=myFunc(rootNode, allIF, caseData))
         t.setDaemon(True)
         t.start()
-        t.join(10)
-    print("\n\n\n\nit's over")
-
-
+        t.join(1)
 
