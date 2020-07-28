@@ -2,6 +2,9 @@ import ast
 import json
 from Resources.cut_paste_rename import list_files
 import threading
+from func_timeout import func_set_timeout
+import func_timeout.exceptions
+import sys
 
 passInstance = None  # 全局变量，别动它，动了就是弟弟
 for iii in ast.walk(ast.parse('pass')):
@@ -88,8 +91,13 @@ def _print_(expr_ast):
     return lis_
 
 
+@func_set_timeout(1)
+def myExec(m):
+    exec(m, {'__name__': '__main__'})
+
+
 def runCodeTool(rootNode, inputStr, outputStr) -> bool:
-    import sys
+
     savedOut = sys.stdout
     try:
         with open('testInput', 'w', encoding='utf8')as f:
@@ -97,17 +105,17 @@ def runCodeTool(rootNode, inputStr, outputStr) -> bool:
         aaa = compile(rootNode, '<string>', 'exec')
         sys.stdin = open('testInput', 'r', encoding='utf8')
         sys.stdout = open('testOut', 'w', encoding='utf8')
-        exec(aaa, {'__name__': '__main__'})
+        myExec(aaa)
         sys.stdout = savedOut
+        print('.', end='')
         with open('testOut', 'r', encoding='utf8')as ff:
             aaa = ff.read()
-            assert aaa == outputStr
-    except Exception as err:
+            assert aaa.__eq__(outputStr)
+    except (func_timeout.exceptions.FunctionTimedOut, Exception) as err:
         sys.stdout = savedOut
         return False
     sys.stdout = savedOut
     return True
-
 
 def myFunc(rootNode, allIf, caseData):
     # allIf, caseData是全局的，不许动
@@ -131,6 +139,7 @@ def myFunc(rootNode, allIf, caseData):
                 tmpList02[i] = 1
         result.append(tmpList02)
         iff.body = safedBody
+    print()
     [print(a) for a in result]
 
 
@@ -162,11 +171,9 @@ def main():
         print("if数量：", end="")
         print(len(allIF))
 
-        t = threading.Thread(target=myFunc, args=(rootNode, allIF, caseData))
+
         print('开始')
-        t.setDaemon(True)
-        t.start()
-        t.join(2)
+        myFunc(rootNode, allIF, caseData)
         print('结束')
 
 

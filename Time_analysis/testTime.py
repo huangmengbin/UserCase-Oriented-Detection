@@ -4,7 +4,7 @@ import datetime
 import func_timeout.exceptions
 
 
-@func_set_timeout(5)
+@func_set_timeout(3)
 def test():
     while True:
         print(111)
@@ -15,7 +15,7 @@ if __name__ == '__main__':
     starttime = datetime.datetime.now()
     try:
         test()
-    except func_timeout.exceptions.FunctionTimedOut:
+    except Exception:
         print(222)
     endtime = datetime.datetime.now()
     print((endtime - starttime).seconds)
