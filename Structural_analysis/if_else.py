@@ -14,10 +14,11 @@ e
 f
 '''
 
+
 a= int(input())##############
 b =[int(a) for a in input().split()]
 c= b[:3]
-if 1== 2:
+if True:
     if a==10000 :
         if c==[6371,5222,5407]:
             pass
@@ -72,6 +73,7 @@ def findAllSimpleIF(rootNode):
 
 def hmbTest():
     rootNode = ast.parse(code)
+
     result = findAllSimpleIF(rootNode)
     print(len(result))
     for node in result:
@@ -79,6 +81,13 @@ def hmbTest():
         print_.append(_print_(node))
     print(if_)
     print(print_)
+
+    # todo 可 对rootNode进行修改
+    aaa = compile(rootNode, '<string>', 'exec')
+    import sys
+    sys.stdin = open('testInput', 'r', encoding='utf8')
+    sys.stdout = open('testOut', 'w', encoding='utf8')
+    exec(aaa)
 
 def _if_(expr_ast):
     lis_ = []
