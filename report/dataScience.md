@@ -85,6 +85,32 @@ https://github.com/huangmengbin/UserCase-Oriented-Detection
 ### 5.gui展示
 通过上述方法得到的数据，在gui中展示出来，可以让使用者很直观的看到一些“面向用例”的情况
 
+### 6.使用的开源库
+
+1. ast
+2. json
+3. Resources.cut_paste_rename
+4. sys
+5. func_timeout.exceptions
+6. func_timeout
+7. tkinter
+8. Resources.cut_paste_rename
+9. String_match.extract_data
+10. matplotlib.pyplot
+11. numpy
+12. urllib.request
+13. urllib.parse
+14. os
+15. zipfile
+16. shutil
+17. re
+18. String_match.partial_ratio
+19. String_match.format
+20. typing
+21. astunparse
+22. Levenshtein
+23. math
+
 ## 五、案例分析
 
 
