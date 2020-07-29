@@ -171,9 +171,10 @@ class users:
                 'A', 'B', 'C', 'D', 'E',
                 'A', 'B', 'C', 'D', 'E'
                 ]
+        bars = [i*5 for i in bars]
         y_pos = np.arange(len(bars))
         # draw column
         plt.bar(y_pos, height)
         # x
-        plt.xticks(y_pos, bars)
+        plt.xticks(y_pos, bars, rotation=270)
         plt.show()
