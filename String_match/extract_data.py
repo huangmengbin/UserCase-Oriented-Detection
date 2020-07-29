@@ -55,7 +55,7 @@ def extract_basic_data(code) -> Tuple[list, list, list]:
     return nodeList, dataList, ptrList
 
 
-class extracter:
+class Extracter:
     code: str
     afterExtractCode: str
     ptrList: list
@@ -131,6 +131,6 @@ func8()
 """
     # 因为code已经被dxw搞定了
     string0000000 = code_format(string0000000)
-    res01 = extracter(string0000000)
+    res01 = Extracter(string0000000)
     print(res01.afterExtractCode)
     [print(type(i), i.__dict__) for i in res01.nodeList]

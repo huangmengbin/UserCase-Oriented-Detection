@@ -1,9 +1,10 @@
 from tkinter import *
 from tkinter import  ttk
 from Resources.cut_paste_rename import list_files
-from String_match.extract_data import extracter
+from String_match.extract_data import Extracter
 import numpy as np
 import matplotlib.pyplot as plt
+from String_match.partial_ratio import *
 size = '1440x810'
 #分辨率
 my_dpi=96
@@ -17,15 +18,17 @@ yesStr = '已判为面向用例'
 noStr = '已判为正常作答'
 
 class users:
+    jsonParser: JsonParser
     manualDict: dict
 
-    def __init__(self, path):
+    def __init__(self, path, jsonParser):
         self.root = Tk()
-
+        self.jsonParser = jsonParser
         self.panedWindow = PanedWindow(self.root)
         self.panedWindow.pack(side='left')
         # 左边那个栏
-        self.code_extracter = extracter('')
+
+        self.partial_ratio = Partial_ratio('', jsonParser)
         self.basePATH = path
         self.root.title(path)
         self.root.geometry(size)
@@ -59,8 +62,6 @@ class users:
         self.textView = Text(self.root, width=150, height=54, state='disabled')
         self.textView.pack()
 
-
-
     def refreshTextByFile(self, file):
         path = self.basePATH + '\\' + file
         self.refreshTextByPath(path)
@@ -78,8 +79,10 @@ class users:
         self.textView.configure(state='disabled')
         pass
 
-    def refreshTextColor(self, aList, string):
-        pass
+    def refreshTextColor(self, color):
+        aList = self.partial_ratio
+        text_content = (self.textView.get("0.0", "end"))
+
 
     def readUserYN(self):
         a = self.userPathList[self.userListBox.curselection()[0]]
@@ -117,7 +120,7 @@ class users:
     def userCallOn(self, event):
         my_path = self.userPathList[self.userListBox.curselection()[0]]
         code = open(my_path, encoding='utf8').read()
-        self.code_extracter = extracter(code)
+        self.partial_ratio = Partial_ratio(code=code, jsonParser=self.jsonParser)
         self.refreshTextByString(code)
         self.gotoUserState()
         self.yes_no_Button['text'] = self.readUserYN()
@@ -139,7 +142,7 @@ class users:
         pass
 
     def extractAction(self):
-        self.refreshTextByString(self.code_extracter.afterExtractCode)
+        self.refreshTextByString(self.partial_ratio.extracter.afterExtractCode)
         self.exitUserState()
         pass
 

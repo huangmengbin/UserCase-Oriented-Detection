@@ -65,7 +65,7 @@ class JsonParser:
 class Partial_ratio:
 
     def __init__(self, code: str, jsonParser: JsonParser):
-        self.extracter = extracter(code=code)
+        self.extracter = Extracter(code=code)
         self.jsonParser = jsonParser
         self.__in()
         self.__out()
@@ -84,7 +84,7 @@ class Partial_ratio:
                 newString = ' '.join(longMessage[leftPtr:rightPtr])
                 if len(newString) > maxStringLength:
                     break
-                tmpRatio = Levenshtein.jaro_winkler(newString, keyWords, 1 / 67666)
+                tmpRatio = Levenshtein.ratio(newString, keyWords)
                 if tmpRatio > resultRatio:
                     resultRatio = tmpRatio
                     lrPtrList = [(leftPtr, rightPtr), ]
