@@ -43,6 +43,7 @@ def reader():
                         print(matrix)
                         matrix = []
                         break
+
                     matrix.append(s[s.find('[') + 1:s.find(']')])
                 judge(matrix,user_id)
             #break
