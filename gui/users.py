@@ -1,7 +1,9 @@
 from tkinter import *
 from tkinter import  ttk
 from Resources.cut_paste_rename import list_files
+from String_match import Partial_ratio
 from String_match.extract_data import Extracter
+from typing import Dict
 import numpy as np
 import matplotlib.pyplot as plt
 from String_match.partial_ratio import *
@@ -17,7 +19,21 @@ noData = '暂无数据!'
 yesStr = '已判为面向用例'
 noStr = '已判为正常作答'
 
+
+def getColor(string):
+    if string is None:
+        return 'b'
+    elif string == noStr:
+        return 'g'
+    elif string == yesStr:
+        return 'r'
+    else:
+        return 'b'
+
+
 class users:
+    partial_ratioDict: Dict[str, Partial_ratio]
+    partial_ratio: Partial_ratio
     jsonParser: JsonParser
     manualDict: dict
 
@@ -62,6 +78,16 @@ class users:
         self.textView = Text(self.root, width=150, height=54, state='disabled')
         self.textView.pack()
 
+        self.partial_ratioDict = self.__initRatioDict()
+
+    def __initRatioDict(self):
+        result = dict()
+        for path in self.userPathList:
+            code = open(path, encoding='utf8').read()
+            partial_ratio = Partial_ratio(code=code, jsonParser=self.jsonParser)
+            result[path] = partial_ratio
+        return result
+
     def refreshTextByFile(self, file):
         path = self.basePATH + '\\' + file
         self.refreshTextByPath(path)
@@ -82,7 +108,6 @@ class users:
     def refreshTextColor(self, color):
         aList = self.partial_ratio
         text_content = (self.textView.get("0.0", "end"))
-
 
     def readUserYN(self):
         a = self.userPathList[self.userListBox.curselection()[0]]
@@ -120,7 +145,7 @@ class users:
     def userCallOn(self, event):
         my_path = self.userPathList[self.userListBox.curselection()[0]]
         code = open(my_path, encoding='utf8').read()
-        self.partial_ratio = Partial_ratio(code=code, jsonParser=self.jsonParser)
+        self.partial_ratio = self.partial_ratioDict.get(my_path)
         self.refreshTextByString(code)
         self.gotoUserState()
         self.yes_no_Button['text'] = self.readUserYN()
@@ -148,39 +173,17 @@ class users:
 
     def showChart(self):
         # height
-        height = [3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45
-                  ]
-        # name of each column
-        bars = ['A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E'
-                ]
-        bars = [i*5 for i in bars]
+        keys = [i for i in self.partial_ratioDict.keys()]
+        keys.sort(key=lambda i: self.partial_ratioDict.get(i).outData[0])
+
+        height = [(self.partial_ratioDict.get(i).outData[0]) for i in keys]
+
+        bars = [(i.split('\\')[-1]).split('_')[1] for i in keys]
         y_pos = np.arange(len(bars))
-        # draw column
-        plt.bar(y_pos, height)
+
+        colorList = [getColor(self.manualDict.get(i)) for i in keys]
+
+        plt.bar(y_pos, height, color=colorList)
         # x
         plt.xticks(y_pos, bars, rotation=270)
         plt.show()

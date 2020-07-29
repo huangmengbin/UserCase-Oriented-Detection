@@ -6,7 +6,7 @@ from String_match.extract_data import *
 
 from String_match.format import case_format
 
-isPrint = True
+isPrint = False
 leftLimitLen = 37
 rightLimitLen = 30
 limitLen = 67
@@ -28,11 +28,12 @@ class JsonParser:
         if isPrint:
             # [print(' input=', i) for i in self.inputDataList]
             pass
-        self.leftInputValidValueList = [JsonParser.__calculateValue(i[0:leftLimitLen]) for i in self.inputDataList]
+
         self.leftInputStrList = [' '.join(i[0:leftLimitLen]) for i in self.inputDataList]
         self.leftInputListLenList = [min(leftLimitLen, len(i)) for i in self.inputDataList]
 
-        self.rightInputValidValueList = [JsonParser.__calculateValue(i[-rightLimitLen:]) for i in self.inputDataList]
+        self.inputValidValueList = [min(JsonParser.__calculateValue(i[0:leftLimitLen]), JsonParser.__calculateValue(i[-rightLimitLen:])) for i in self.inputDataList]
+
         self.rightInputStrList = [' '.join(i[-rightLimitLen:]) for i in self.inputDataList]
         self.rightInputListLenList = [min(rightLimitLen, len(i)) for i in self.inputDataList]
 
@@ -61,17 +62,16 @@ class JsonParser:
             result = 1 - 7 * math.exp(-totalStringLen)
         return round(result, 4)
 
-
 class Partial_ratio:
 
     def __init__(self, code: str, jsonParser: JsonParser):
         self.extracter = Extracter(code=code)
         self.jsonParser = jsonParser
-        self.__in()
-        self.__out()
+        self.inData = self.__in()
+        self.outData = self.__out()
 
         if isPrint:
-            # print('message=', self.extracter.dataList)
+            print('message=', self.extracter.dataList)
             pass
 
     @staticmethod
@@ -84,7 +84,7 @@ class Partial_ratio:
                 newString = ' '.join(longMessage[leftPtr:rightPtr])
                 if len(newString) > maxStringLength:
                     break
-                tmpRatio = Levenshtein.ratio(newString, keyWords)
+                tmpRatio = Levenshtein.jaro(newString, keyWords)
                 if tmpRatio > resultRatio:
                     resultRatio = tmpRatio
                     lrPtrList = [(leftPtr, rightPtr), ]
@@ -93,18 +93,32 @@ class Partial_ratio:
         return resultRatio, lrPtrList
 
     def __in(self):
+        totalResult = 0.0
+        totalValid = 0.0
+        resultPtrList = []
         for i in range(len(self.jsonParser.outputDataList)):
-            self.__input_partial_ratio(self.jsonParser.leftInputStrList[i], self.jsonParser.rightInputStrList[i])
-            a = min(self.jsonParser.leftInputValidValueList[i], self.jsonParser.rightInputValidValueList[i])
-            print('inputValid =', a)
-        pass
+            aa = self.__input_partial_ratio(self.jsonParser.leftInputStrList[i], self.jsonParser.rightInputStrList[i])
+            ratio = aa[0]
+            ptrLi = aa[1]
+            valid = self.jsonParser.inputValidValueList[i]
+            totalResult += ratio * valid
+            resultPtrList += ptrLi
+            totalValid += valid
+        return totalResult / totalValid, resultPtrList
 
     def __out(self):
+        totalResult = 0.0
+        totalValid = 0.0
+        resultPtrList = []
         for i in range(len(self.jsonParser.outputDataList)):
-            self.__output_partial_ratio(self.jsonParser.outputStrList[i])
-            a = self.jsonParser.outputValidValueList[i]
-            print('outputValid =', a)
-        pass
+            aa = self.__output_partial_ratio(self.jsonParser.outputStrList[i])
+            ratio = aa[0]
+            ptrLi = aa[1]
+            valid = self.jsonParser.outputValidValueList[i]
+            totalResult += ratio * valid
+            resultPtrList += ptrLi
+            totalValid += valid
+        return totalResult / totalValid, resultPtrList
 
     def __input_partial_ratio(self, left_input_case: str, right_input_case):
         # todo right 虽然大家都写startWith，几乎不管后面的
@@ -120,8 +134,7 @@ class Partial_ratio:
                 pptrLi += self.extracter.ptrList[i[0]:i[1]]
                 mstrLi += self.extracter.dataList[i[0]:i[1]]
                 nodeLi += self.extracter.nodeList[i[0]:i[1]]
-        print('input=', left_input_case, ';ratio=', ratio, '可疑字符串:', ' '.join(mstrLi))
-        pass
+        return ratio, pptrLi
 
     def __output_partial_ratio(self, output_case: str):
         hmb = self.getRatio(output_case, self.extracter.dataList)
@@ -134,6 +147,7 @@ class Partial_ratio:
                 mstrLi += self.extracter.dataList[i[0]:i[1]]
                 nodeLi += self.extracter.nodeList[i[0]:i[1]]
         print('expected=', output_case, ';ratio=', hmb[0], '可疑字符串:', ' '.join(mstrLi))
+        return hmb[0], pptrLi
 
 
 if __name__ == '__main__':
