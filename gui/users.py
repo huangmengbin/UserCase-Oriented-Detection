@@ -55,6 +55,12 @@ class users:
 
         self.manualDict = eval(open(path + '\\manual inspection.json', encoding='utf8').read())
 
+        self.chartButton = ttk.Button(self.panedWindow, text='show chart', command=self.showChart)
+        self.chartButton.pack()
+
+        self.redShowButton = ttk.Button(self.panedWindow, text='标记可疑字符', command=self.refreshTextColor, state='disabled')
+        self.redShowButton.pack()
+
         self.yes_no_Button = ttk.Button(self.panedWindow, text=noData, command=self.changeCommentStateByMouse, state='disabled')
         self.yes_no_Button.pack()
         self.yes_no_Button.bind_all('<n>', self.changeCommentStateByKeyBoard)
@@ -62,8 +68,7 @@ class users:
 
         self.extractButton = ttk.Button(self.panedWindow, text='数据提取', command=self.extractAction, state='disabled')
         self.extractButton.pack()
-        self.chartButton = ttk.Button(self.panedWindow, text='show chart', command=self.showChart)
-        self.chartButton.pack()
+
         self.userListBox = Listbox(self.panedWindow, width=18, height=30)
         self.userPathList = [item for item in list_files(path)
                         if item.endswith(".py") and not item.endswith('answer.py')]
@@ -81,8 +86,6 @@ class users:
         self.textView.pack()
 
         self.partial_ratioDict = self.__initRatioDict()
-
-
 
     def __initRatioDict(self):
         result = dict()
@@ -109,9 +112,20 @@ class users:
         self.textView.configure(state='disabled')
         pass
 
-    def refreshTextColor(self, color):
-        aList = self.partial_ratio
+    def refreshTextColor(self):
+        # todo 把数据标红，下标也给出了。有一些东西可以参考上面的那个【 def refreshTextByString(self, string):】
+        color = 'r'  # 红色
+        aList = self.partial_ratio.inData[1]  # 输入数据的下标
+        bList = self.partial_ratio.outData[1]  # 输出的
+        print('可疑字符串的下标=', aList)  # 打印出来看看而已
         text_content = (self.textView.get("0.0", "end"))
+        print(text_content)  # 打印出来看看而已
+        text_content_list = text_content.split('\n')
+        print(text_content_list)  # 打印出来看看而已
+        print('=' * 6766)
+        for oneLine in text_content_list:
+            pass
+
 
     def readUserYN(self):
         a = self.userPathList[self.userListBox.curselection()[0]]
@@ -152,10 +166,12 @@ class users:
             ff.write(str(self.manualDict))
 
     def gotoUserState(self):
+        self.redShowButton.configure(state='normal')
         self.extractButton.configure(state='normal')
         self.yes_no_Button.configure(state='normal')
 
     def exitUserState(self):
+        self.redShowButton.configure(state='disabled')
         self.extractButton.configure(state='disabled')
         self.yes_no_Button.configure(state='disabled')
 
@@ -185,16 +201,14 @@ class users:
 
     def extractAction(self):
         self.refreshTextByString(self.partial_ratio.extracter.afterExtractCode)
-        self.exitUserState()
         pass
 
     def showChart(self):
         # height
         keys = [i for i in self.partial_ratioDict.keys()]
-        keys.sort(key=lambda i: self.partial_ratioDict.get(i).outData[0])
+        keys.sort(key=lambda i: self.partial_ratioDict.get(i).inData[0])
 
-        height = [(self.partial_ratioDict.get(i).outData[0]) for i in keys]
-
+        height = [(self.partial_ratioDict.get(i).inData[0]) for i in keys]
         bars = [(i.split('\\')[-1]).split('_')[1] for i in keys]
         y_pos = np.arange(len(bars))
 
