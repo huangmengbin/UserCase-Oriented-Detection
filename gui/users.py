@@ -1,8 +1,14 @@
 from tkinter import *
+from tkinter import  ttk
 from Resources.cut_paste_rename import list_files
 from String_match.extract_data import extracter
+import numpy as np
+import matplotlib.pyplot as plt
 size = '1440x810'
-
+#分辨率
+my_dpi=96
+#图大小
+plt.figure(figsize=(480/my_dpi,480/my_dpi), dpi=my_dpi)
 
 class users:
     def __init__(self, path):
@@ -15,8 +21,10 @@ class users:
         self.root.title(path)
         self.root.geometry(size)
 
-        self.extractButton = Button(self.panedWindow, text='数据提取', command=self.extractAction, state='disabled')
+        self.extractButton = ttk.Button(self.panedWindow, text='数据提取', command=self.extractAction, state='disabled')
         self.extractButton.pack()
+        self.chartButton = ttk.Button(self.panedWindow, text='show chart', command=self.showChart)
+        self.chartButton.pack()
         self.userListBox = Listbox(self.panedWindow, width=18, height=30)
         self.userPathList = [item for item in list_files(path)
                         if item.endswith(".py") and not item.endswith('answer.py')]
@@ -24,11 +32,11 @@ class users:
          for item in self.userPathList]
         self.userListBox.bind('<Double-Button-1>', self.userCallOn)
         self.userListBox.pack()
-        self.true_answer_button = Button(self.panedWindow, text='answer', command=self.answerAction)
+        self.true_answer_button = ttk.Button(self.panedWindow, text='answer', command=self.answerAction)
         self.true_answer_button.pack()
-        self.readmeButton = Button(self.panedWindow, text='readme', command=self.readmeAction)
+        self.readmeButton = ttk.Button(self.panedWindow, text='readme', command=self.readmeAction)
         self.readmeButton.pack()
-        self.test_case_button = Button(self.panedWindow, text='test-cases', command=self.testCaseAction)
+        self.test_case_button = ttk.Button(self.panedWindow, text='test-cases', command=self.testCaseAction)
         self.test_case_button.pack()
         self.textView = Text(self.root, width=150, height=54, state='disabled')
         self.textView.pack()
@@ -83,3 +91,43 @@ class users:
         self.refreshTextByString(self.code_extracter.afterExtractCode)
         self.exitUserState()
         pass
+
+    def showChart(self):
+        # height
+        height = [3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45,
+                  3, 12, 5, 18, 45
+
+
+                  ]
+        # name of each column
+        bars = ['A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E',
+                'A', 'B', 'C', 'D', 'E'
+                ]
+        y_pos = np.arange(len(bars))
+        # draw column
+        plt.bar(y_pos, height)
+        # x
+        plt.xticks(y_pos, bars)
+        plt.show()
