@@ -12,9 +12,16 @@ plt.figure(figsize=(480/my_dpi,480/my_dpi), dpi=my_dpi)
 plt.rcParams['font.sans-serif']=['SimHei']   # 用黑体显示中文
 plt.rcParams['axes.unicode_minus']=False     # 正常显示负号
 
+noData = '暂无数据!'
+yesStr = '已判为面向用例'
+noStr = '已判为正常作答'
+
 class users:
+    manualDict: dict
+
     def __init__(self, path):
         self.root = Tk()
+
         self.panedWindow = PanedWindow(self.root)
         self.panedWindow.pack(side='left')
         # 左边那个栏
@@ -22,6 +29,15 @@ class users:
         self.basePATH = path
         self.root.title(path)
         self.root.geometry(size)
+
+        with open(self.basePATH + '\\manual inspection.json', 'r+', encoding='utf8') as ff:
+            if ff.read() == '':
+                ff.write('{}')
+
+        self.manualDict = eval(open(path + '\\manual inspection.json', encoding='utf8').read())
+
+        self.yes_no_Button = ttk.Button(self.panedWindow, text=noData, command=self.changeCommentState, state='disabled')
+        self.yes_no_Button.pack()
 
         self.extractButton = ttk.Button(self.panedWindow, text='数据提取', command=self.extractAction, state='disabled')
         self.extractButton.pack()
@@ -43,6 +59,8 @@ class users:
         self.textView = Text(self.root, width=150, height=54, state='disabled')
         self.textView.pack()
 
+
+
     def refreshTextByFile(self, file):
         path = self.basePATH + '\\' + file
         self.refreshTextByPath(path)
@@ -60,11 +78,38 @@ class users:
         self.textView.configure(state='disabled')
         pass
 
+    def readUserYN(self):
+        a = self.userPathList[self.userListBox.curselection()[0]]
+        result = self.manualDict.get(a)
+        if result is None:
+            return noData
+        else:
+            return result
+
+    def changeCommentState(self):
+        oldString = self.yes_no_Button['text']
+        if oldString == noData or oldString == noStr:
+            newString = yesStr
+        else:
+            newString = noStr
+
+        self.yes_no_Button['text'] = newString
+        self.writeUserYN(newString)
+
+    def writeUserYN(self, newString):
+        a = self.userPathList[self.userListBox.curselection()[0]]
+        self.manualDict[a] = newString
+
+        with open(self.basePATH + '\\manual inspection.json', 'w', encoding='utf8') as ff:
+            ff.write(str(self.manualDict))
+
     def gotoUserState(self):
         self.extractButton.configure(state='normal')
+        self.yes_no_Button.configure(state='normal')
 
     def exitUserState(self):
         self.extractButton.configure(state='disabled')
+        self.yes_no_Button.configure(state='disabled')
 
     def userCallOn(self, event):
         my_path = self.userPathList[self.userListBox.curselection()[0]]
@@ -72,6 +117,7 @@ class users:
         self.code_extracter = extracter(code)
         self.refreshTextByString(code)
         self.gotoUserState()
+        self.yes_no_Button['text'] = self.readUserYN()
         pass
 
     def answerAction(self, ):
