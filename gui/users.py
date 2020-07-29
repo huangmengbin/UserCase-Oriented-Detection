@@ -55,8 +55,10 @@ class users:
 
         self.manualDict = eval(open(path + '\\manual inspection.json', encoding='utf8').read())
 
-        self.yes_no_Button = ttk.Button(self.panedWindow, text=noData, command=self.changeCommentState, state='disabled')
+        self.yes_no_Button = ttk.Button(self.panedWindow, text=noData, command=self.changeCommentStateByMouse, state='disabled')
         self.yes_no_Button.pack()
+        self.yes_no_Button.bind_all('<n>', self.changeCommentStateByKeyBoard)
+        self.yes_no_Button.bind_all('<m>', self.changeCommentStateByKeyBoard)
 
         self.extractButton = ttk.Button(self.panedWindow, text='数据提取', command=self.extractAction, state='disabled')
         self.extractButton.pack()
@@ -79,6 +81,8 @@ class users:
         self.textView.pack()
 
         self.partial_ratioDict = self.__initRatioDict()
+
+
 
     def __initRatioDict(self):
         result = dict()
@@ -117,11 +121,24 @@ class users:
         else:
             return result
 
-    def changeCommentState(self):
+    def changeCommentStateByMouse(self):
         oldString = self.yes_no_Button['text']
         if oldString == noData or oldString == noStr:
             newString = yesStr
         else:
+            newString = noStr
+
+        self.yes_no_Button['text'] = newString
+        self.writeUserYN(newString)
+
+    def changeCommentStateByKeyBoard(self, event):
+        if str(self.yes_no_Button['state']) == 'disabled':
+            return
+
+        newString = noData
+        if event.char == 'm':
+            newString = yesStr
+        elif event.char == 'n':
             newString = noStr
 
         self.yes_no_Button['text'] = newString
