@@ -11,13 +11,14 @@ if __name__ == '__main__':
     # li = []
     # ratios = []
     # [135:136]
-    for problem in problems[136:]:
+    for problem in problems[200:]:
         answers = [i for i in list_files(problem) if i.endswith(".py") and not i.endswith('answer.py')]
         jsonFile = open(problem + '\\testCases.json', encoding='utf8')
         jsonData = json.loads(jsonFile.read())
         print('\n=========================================================\n' + problem)
         jsonParser = JsonParser(jsonData=jsonData)
         for answerPATH in answers:
+            print(answerPATH)
             answerFile = open(answerPATH, encoding='utf8')
             answer = answerFile.read()
 

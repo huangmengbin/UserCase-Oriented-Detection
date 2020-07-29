@@ -1,9 +1,12 @@
 from tkinter import *
 from tkinter import  ttk
 from Resources.cut_paste_rename import list_files
-from String_match.extract_data import extracter
+from String_match import Partial_ratio
+from String_match.extract_data import Extracter
+from typing import Dict
 import numpy as np
 import matplotlib.pyplot as plt
+from String_match.partial_ratio import *
 size = '1440x810'
 #分辨率
 my_dpi=96
@@ -16,16 +19,32 @@ noData = '暂无数据!'
 yesStr = '已判为面向用例'
 noStr = '已判为正常作答'
 
+
+def getColor(string):
+    if string is None:
+        return 'b'
+    elif string == noStr:
+        return 'g'
+    elif string == yesStr:
+        return 'r'
+    else:
+        return 'b'
+
+
 class users:
+    partial_ratioDict: Dict[str, Partial_ratio]
+    partial_ratio: Partial_ratio
+    jsonParser: JsonParser
     manualDict: dict
 
-    def __init__(self, path):
+    def __init__(self, path, jsonParser):
         self.root = Tk()
-
+        self.jsonParser = jsonParser
         self.panedWindow = PanedWindow(self.root)
         self.panedWindow.pack(side='left')
         # 左边那个栏
-        self.code_extracter = extracter('')
+
+        self.partial_ratio = Partial_ratio('', jsonParser)
         self.basePATH = path
         self.root.title(path)
         self.root.geometry(size)
@@ -36,8 +55,10 @@ class users:
 
         self.manualDict = eval(open(path + '\\manual inspection.json', encoding='utf8').read())
 
-        self.yes_no_Button = ttk.Button(self.panedWindow, text=noData, command=self.changeCommentState, state='disabled')
+        self.yes_no_Button = ttk.Button(self.panedWindow, text=noData, command=self.changeCommentStateByMouse, state='disabled')
         self.yes_no_Button.pack()
+        self.yes_no_Button.bind_all('<n>', self.changeCommentStateByKeyBoard)
+        self.yes_no_Button.bind_all('<m>', self.changeCommentStateByKeyBoard)
 
         self.extractButton = ttk.Button(self.panedWindow, text='数据提取', command=self.extractAction, state='disabled')
         self.extractButton.pack()
@@ -59,7 +80,17 @@ class users:
         self.textView = Text(self.root, width=150, height=54, state='disabled')
         self.textView.pack()
 
+        self.partial_ratioDict = self.__initRatioDict()
 
+
+
+    def __initRatioDict(self):
+        result = dict()
+        for path in self.userPathList:
+            code = open(path, encoding='utf8').read()
+            partial_ratio = Partial_ratio(code=code, jsonParser=self.jsonParser)
+            result[path] = partial_ratio
+        return result
 
     def refreshTextByFile(self, file):
         path = self.basePATH + '\\' + file
@@ -78,6 +109,10 @@ class users:
         self.textView.configure(state='disabled')
         pass
 
+    def refreshTextColor(self, color):
+        aList = self.partial_ratio
+        text_content = (self.textView.get("0.0", "end"))
+
     def readUserYN(self):
         a = self.userPathList[self.userListBox.curselection()[0]]
         result = self.manualDict.get(a)
@@ -86,11 +121,24 @@ class users:
         else:
             return result
 
-    def changeCommentState(self):
+    def changeCommentStateByMouse(self):
         oldString = self.yes_no_Button['text']
         if oldString == noData or oldString == noStr:
             newString = yesStr
         else:
+            newString = noStr
+
+        self.yes_no_Button['text'] = newString
+        self.writeUserYN(newString)
+
+    def changeCommentStateByKeyBoard(self, event):
+        if str(self.yes_no_Button['state']) == 'disabled':
+            return
+
+        newString = noData
+        if event.char == 'm':
+            newString = yesStr
+        elif event.char == 'n':
             newString = noStr
 
         self.yes_no_Button['text'] = newString
@@ -114,7 +162,7 @@ class users:
     def userCallOn(self, event):
         my_path = self.userPathList[self.userListBox.curselection()[0]]
         code = open(my_path, encoding='utf8').read()
-        self.code_extracter = extracter(code)
+        self.partial_ratio = self.partial_ratioDict.get(my_path)
         self.refreshTextByString(code)
         self.gotoUserState()
         self.yes_no_Button['text'] = self.readUserYN()
@@ -136,45 +184,23 @@ class users:
         pass
 
     def extractAction(self):
-        self.refreshTextByString(self.code_extracter.afterExtractCode)
+        self.refreshTextByString(self.partial_ratio.extracter.afterExtractCode)
         self.exitUserState()
         pass
 
     def showChart(self):
         # height
-        height = [3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45,
-                  3, 12, 5, 18, 45
-                  ]
-        # name of each column
-        bars = ['A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E',
-                'A', 'B', 'C', 'D', 'E'
-                ]
-        bars = [i*5 for i in bars]
+        keys = [i for i in self.partial_ratioDict.keys()]
+        keys.sort(key=lambda i: self.partial_ratioDict.get(i).outData[0])
+
+        height = [(self.partial_ratioDict.get(i).outData[0]) for i in keys]
+
+        bars = [(i.split('\\')[-1]).split('_')[1] for i in keys]
         y_pos = np.arange(len(bars))
-        # draw column
-        plt.bar(y_pos, height)
+
+        colorList = [getColor(self.manualDict.get(i)) for i in keys]
+
+        plt.bar(y_pos, height, color=colorList)
         # x
         plt.xticks(y_pos, bars, rotation=270)
         plt.show()

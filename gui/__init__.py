@@ -1,15 +1,18 @@
-from tkinter import ttk
 from tkinter import *
 from Resources.cut_paste_rename import list_files
 from gui.users import users
-
+from String_match.partial_ratio import *
+import json
 basePATH = 'D:\\czyFile'
 
 
 
 def CallOn(event):
     problemListBox.get(problemListBox.curselection())
-    users(problemPathList[problemListBox.curselection()[0]])
+    path = problemPathList[problemListBox.curselection()[0]]
+    print(path)
+    jsonParser = JsonParser(jsonData=json.loads(open(path + '\\testCases.json').read()))
+    users(path, jsonParser)
 
 
 if __name__ == '__main__':
