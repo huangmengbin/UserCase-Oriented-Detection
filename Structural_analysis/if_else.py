@@ -166,7 +166,6 @@ def main():
                 F.write(problemPATH + '\n')
                 F.write(codeFilePath + '\n')
 
-
 if __name__ == '__main__':
     main()
 

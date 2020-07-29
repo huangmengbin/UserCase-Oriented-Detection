@@ -9,6 +9,8 @@ size = '1440x810'
 my_dpi=96
 #图大小
 plt.figure(figsize=(480/my_dpi,480/my_dpi), dpi=my_dpi)
+plt.rcParams['font.sans-serif']=['SimHei']   # 用黑体显示中文
+plt.rcParams['axes.unicode_minus']=False     # 正常显示负号
 
 class users:
     def __init__(self, path):
@@ -107,8 +109,6 @@ class users:
                   3, 12, 5, 18, 45,
                   3, 12, 5, 18, 45,
                   3, 12, 5, 18, 45
-
-
                   ]
         # name of each column
         bars = ['A', 'B', 'C', 'D', 'E',
