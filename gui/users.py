@@ -78,6 +78,9 @@ class users:
         self.textView.configure(state='disabled')
         pass
 
+    def refreshTextColor(self, aList, string):
+        pass
+
     def readUserYN(self):
         a = self.userPathList[self.userListBox.curselection()[0]]
         result = self.manualDict.get(a)

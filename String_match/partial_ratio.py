@@ -95,25 +95,32 @@ class Partial_ratio:
     def __in(self):
         for i in range(len(self.jsonParser.outputDataList)):
             self.__input_partial_ratio(self.jsonParser.leftInputStrList[i], self.jsonParser.rightInputStrList[i])
+            a = min(self.jsonParser.leftInputValidValueList[i], self.jsonParser.rightInputValidValueList[i])
+            print('inputValid =', a)
         pass
 
     def __out(self):
         for i in range(len(self.jsonParser.outputDataList)):
             self.__output_partial_ratio(self.jsonParser.outputStrList[i])
+            a = self.jsonParser.outputValidValueList[i]
+            print('outputValid =', a)
         pass
 
     def __input_partial_ratio(self, left_input_case: str, right_input_case):
         # todo right 虽然大家都写startWith，几乎不管后面的
-        hmb = self.getRatio(left_input_case, self.extracter.dataList)
+        hmbL = self.getRatio(left_input_case, self.extracter.dataList)
+        hmbR = self.getRatio(right_input_case, self.extracter.dataList)
+        hmb = hmbL if hmbL[0] >= hmbR[0] else hmbR
         pptrLi = []
         mstrLi = []
         nodeLi = []
-        if hmb[0] > 0:
+        ratio = hmb[0]
+        if ratio > 0:
             for i in hmb[1]:
                 pptrLi += self.extracter.ptrList[i[0]:i[1]]
                 mstrLi += self.extracter.dataList[i[0]:i[1]]
                 nodeLi += self.extracter.nodeList[i[0]:i[1]]
-        print('input=', left_input_case, ';', hmb[0], '->', ' '.join(mstrLi))
+        print('input=', left_input_case, ';ratio=', ratio, '可疑字符串:', ' '.join(mstrLi))
         pass
 
     def __output_partial_ratio(self, output_case: str):
@@ -126,7 +133,7 @@ class Partial_ratio:
                 pptrLi += self.extracter.ptrList[i[0]:i[1]]
                 mstrLi += self.extracter.dataList[i[0]:i[1]]
                 nodeLi += self.extracter.nodeList[i[0]:i[1]]
-        print('expected=', output_case, ';', hmb[0], '->', ' '.join(mstrLi))
+        print('expected=', output_case, ';ratio=', hmb[0], '可疑字符串:', ' '.join(mstrLi))
 
 
 if __name__ == '__main__':
