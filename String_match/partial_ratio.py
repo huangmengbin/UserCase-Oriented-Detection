@@ -53,7 +53,7 @@ class JsonParser:
             assert type(i) == str
             totalStringLen += 1 if isSpecialString(i) else len(i) + 1
             maxStringLen = max(maxStringLen, len(i))
-        # todo 需要求出一个xx指标
+
         if totalStringLen == 1:
             result = 0.1
         elif totalStringLen == 2:
@@ -124,7 +124,7 @@ class Partial_ratio:
         return totalResult / totalValid, resultPtrList, totalValid
 
     def __input_partial_ratio(self, left_input_case: str, right_input_case):
-        # todo right 虽然大家都写startWith，几乎不管后面的
+
         hmbL = self.getRatio(left_input_case, self.extracter.dataList)
         hmbR = self.getRatio(right_input_case, self.extracter.dataList)
         hmb = hmbL if hmbL[0] >= hmbR[0] else hmbR
