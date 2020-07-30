@@ -85,7 +85,7 @@ def reader():
             f.readline()
             case_num = int(f.readline())
         if str.endswith(".py\n"):
-            user_id = str[str.find('r') + 2:str.find("r") + 7]
+            user_id = str.split('\\')[3].split('_')[1]#str[str.find('r') + 2:str.find("r") + 7]
             f.readline()
             if_num = int(f.readline())
             s = f.readline()
