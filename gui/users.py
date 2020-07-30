@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import  ttk
+import tkinter.font as tf
 from Resources.cut_paste_rename import list_files
 from String_match import Partial_ratio
 from String_match.extract_data import Extracter
@@ -113,18 +114,36 @@ class users:
         pass
 
     def refreshTextColor(self):
+        #
         # todo 把数据标红，下标也给出了。有一些东西可以参考上面的那个【 def refreshTextByString(self, string):】
-        color = 'r'  # 红色
+        color = 'red'  # 字体红色
         aList = self.partial_ratio.inData[1]  # 输入数据的下标
         bList = self.partial_ratio.outData[1]  # 输出的
+        aList+=bList
+        aList.sort(key=lambda x: x[0])
+        targetLines = list(set([i[0] for i in aList]))
+
         print('可疑字符串的下标=', aList)  # 打印出来看看而已
         text_content = (self.textView.get("0.0", "end"))
-        print(text_content)  # 打印出来看看而已
+        # print(text_content)  # 打印出来看看而已
         text_content_list = text_content.split('\n')
         print(text_content_list)  # 打印出来看看而已
         print('=' * 6766)
-        for oneLine in text_content_list:
-            pass
+        ptrINput=0
+        ptrOutput=0
+        for i in range(len(text_content_list)):
+            if i+1 in targetLines:
+                while ptrINput < len(aList) and aList[ptrINput][0] == i+1:
+                    pos = str(i + 1) + '.'
+                    self.textView.tag_add('tag', pos+str(aList[ptrINput][1]),pos+str(aList[ptrINput][2]))
+                    self.textView.tag_config('tag', background='yellow',foreground=color)
+                    self.textView.insert(pos+str(aList[ptrINput][1]), text_content_list[i] + '\n', 'tag')
+                    ptrINput += 1
+            else:
+                pos = str(i + 1) + '.0'
+                self.textView.insert(pos, text_content_list[i] + '\n', 'tag')
+
+        # print(self.textView.get("0.0", "end"))
 
 
     def readUserYN(self):
