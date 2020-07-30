@@ -14,7 +14,6 @@ def judge(beforeDeleteIf, matrix, user_id, yyf):
         _is_ = 0
         _valid = (beforeDeleteIf).count(1)/len(beforeDeleteIf)
     else:
-        # todo
         '''
         有一个，没删前的beforeDeleteIf，看看有几个1？0个 1个 直接和上面一样算了，不管了。
         beforeDeleteIf若有0，把大矩阵对应的 列 删了。本来都不能过测试，之后肯定也不能过
