@@ -104,7 +104,7 @@ class Partial_ratio:
             totalResult += ratio * valid
             resultPtrList += ptrLi
             totalValid += valid
-        return totalResult / totalValid, resultPtrList
+        return totalResult / totalValid, resultPtrList, totalValid
 
     def __out(self):
         totalResult = 0.0
@@ -118,7 +118,7 @@ class Partial_ratio:
             totalResult += ratio * valid
             resultPtrList += ptrLi
             totalValid += valid
-        return totalResult / totalValid, resultPtrList
+        return totalResult / totalValid, resultPtrList, totalValid
 
     def __input_partial_ratio(self, left_input_case: str, right_input_case):
         # todo right 虽然大家都写startWith，几乎不管后面的

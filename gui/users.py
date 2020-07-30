@@ -237,9 +237,9 @@ class users:
     def showStringMatchChart(self):
         # height
         keys = [i for i in self.partial_ratioDict.keys()]
-        keys.sort(key=lambda i: self.partial_ratioDict.get(i).inData[0])
+        keys.sort(key=lambda i: (self.partial_ratioDict.get(i).inData[0]*self.partial_ratioDict.get(i).inData[2]+self.partial_ratioDict.get(i).outData[0]*self.partial_ratioDict.get(i).outData[2])/(self.partial_ratioDict.get(i).inData[2]+self.partial_ratioDict.get(i).outData[2]))
 
-        height = [(self.partial_ratioDict.get(i).inData[0]) for i in keys]
+        height = [(self.partial_ratioDict.get(i).inData[0]*self.partial_ratioDict.get(i).inData[2]+self.partial_ratioDict.get(i).outData[0]*self.partial_ratioDict.get(i).outData[2])/(self.partial_ratioDict.get(i).inData[2]+self.partial_ratioDict.get(i).outData[2]) for i in keys]
 
         bars = [(i.split('\\')[-1]).split('_')[1] for i in keys]
 
