@@ -121,7 +121,7 @@ def main():
     problems = list_files(filePATH)
     for num in range(len(problems)):
         problemPATH = problems[num]
-        if num < 127 or num > 467:
+        if num < 142 or num > 467:
             continue
         try:
             print(num)
