@@ -1,19 +1,18 @@
 from tkinter import *
-from tkinter import  ttk
+from tkinter import ttk
 from Resources.cut_paste_rename import list_files
-from String_match import Partial_ratio
-from String_match.extract_data import Extracter
 from typing import Dict
 import numpy as np
 import matplotlib.pyplot as plt
 from String_match.partial_ratio import *
+
 size = '1440x810'
-#分辨率
-my_dpi=96
-#图大小
-plt.figure(figsize=(480/my_dpi,480/my_dpi), dpi=my_dpi)
-plt.rcParams['font.sans-serif']=['SimHei']   # 用黑体显示中文
-plt.rcParams['axes.unicode_minus']=False     # 正常显示负号
+# 分辨率
+my_dpi = 96
+# 图大小
+plt.figure(figsize=(480 / my_dpi, 480 / my_dpi), dpi=my_dpi)
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 用黑体显示中文
+plt.rcParams['axes.unicode_minus'] = False  # 正常显示负号
 
 noData = '暂无数据!'
 yesStr = '已判为面向用例'
@@ -32,12 +31,13 @@ def getColor(string):
 
 
 class users:
+    if_else_dict: dict
     partial_ratioDict: Dict[str, Partial_ratio]
     partial_ratio: Partial_ratio
     jsonParser: JsonParser
     manualDict: dict
 
-    def __init__(self, path, jsonParser):
+    def __init__(self, path, jsonParser, ifelseDict):
         self.root = Tk()
         self.jsonParser = jsonParser
         self.panedWindow = PanedWindow(self.root)
@@ -49,19 +49,26 @@ class users:
         self.root.title(path)
         self.root.geometry(size)
 
+        self.if_else_dict = ifelseDict
+
         with open(self.basePATH + '\\manual inspection.json', 'r+', encoding='utf8') as ff:
             if ff.read() == '':
                 ff.write('{}')
 
         self.manualDict = eval(open(path + '\\manual inspection.json', encoding='utf8').read())
 
-        self.chartButton = ttk.Button(self.panedWindow, text='show chart', command=self.showChart)
+        self.chartButton = ttk.Button(self.panedWindow, text='show chart', command=self.showStringMatchChart)
         self.chartButton.pack()
 
-        self.redShowButton = ttk.Button(self.panedWindow, text='标记可疑字符', command=self.refreshTextColor, state='disabled')
+        self.ifelseChartButton = ttk.Button(self.panedWindow, text='if else', command=self.showIfElseChart)
+        self.ifelseChartButton.pack()
+
+        self.redShowButton = ttk.Button(self.panedWindow, text='标记可疑字符', command=self.refreshTextColor,
+                                        state='disabled')
         self.redShowButton.pack()
 
-        self.yes_no_Button = ttk.Button(self.panedWindow, text=noData, command=self.changeCommentStateByMouse, state='disabled')
+        self.yes_no_Button = ttk.Button(self.panedWindow, text=noData, command=self.changeCommentStateByMouse,
+                                        state='disabled')
         self.yes_no_Button.pack()
         self.yes_no_Button.bind_all('<n>', self.changeCommentStateByKeyBoard)
         self.yes_no_Button.bind_all('<m>', self.changeCommentStateByKeyBoard)
@@ -71,7 +78,7 @@ class users:
 
         self.userListBox = Listbox(self.panedWindow, width=18, height=30)
         self.userPathList = [item for item in list_files(path)
-                        if item.endswith(".py") and not item.endswith('answer.py')]
+                             if item.endswith(".py") and not item.endswith('answer.py')]
         [self.userListBox.insert(self.userListBox.size(), str(item).split('\\')[3][5:-3])
          for item in self.userPathList]
         self.userListBox.bind('<Double-Button-1>', self.userCallOn)
@@ -125,7 +132,6 @@ class users:
         print('=' * 6766)
         for oneLine in text_content_list:
             pass
-
 
     def readUserYN(self):
         a = self.userPathList[self.userListBox.curselection()[0]]
@@ -203,18 +209,38 @@ class users:
         self.refreshTextByString(self.partial_ratio.extracter.afterExtractCode)
         pass
 
-    def showChart(self):
+    @staticmethod
+    def showChart(height, bars, colorList):
+        height = [i if i > 0 else float(0.0267) for i in height]
+        y_pos = np.arange(len(bars))
+        plt.ylim((0, 1))
+        plt.bar(y_pos, height, color=colorList)
+        plt.xticks(y_pos, bars, rotation=270)
+        plt.show()
+
+    def showStringMatchChart(self):
         # height
         keys = [i for i in self.partial_ratioDict.keys()]
         keys.sort(key=lambda i: self.partial_ratioDict.get(i).inData[0])
 
         height = [(self.partial_ratioDict.get(i).inData[0]) for i in keys]
+
         bars = [(i.split('\\')[-1]).split('_')[1] for i in keys]
-        y_pos = np.arange(len(bars))
 
         colorList = [getColor(self.manualDict.get(i)) for i in keys]
+        self.showChart(height, bars, colorList)
 
-        plt.bar(y_pos, height, color=colorList)
-        # x
-        plt.xticks(y_pos, bars, rotation=270)
-        plt.show()
+    def showIfElseChart(self):
+        if not self.if_else_dict:
+            return
+        keys = [i for i in self.if_else_dict.keys()]
+        keys.sort(key=lambda i: self.if_else_dict.get(i)[0])
+        height = [float(self.if_else_dict.get(i)[0]) for i in keys]
+        bars = keys
+
+        tmpDict = dict()
+        for i in self.manualDict.keys():
+            ii = i.split('\\')[3].split('_')[1]
+            tmpDict[ii] = i
+        colorList = [getColor(self.manualDict.get(tmpDict.get(i))) for i in keys]
+        self.showChart(height, bars, colorList)
