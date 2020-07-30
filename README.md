@@ -1,11 +1,5 @@
 # UserCase-Oriented-Detection
 Python OJ 面向用例检测
-## no shutdown
-刚刚push成功了,真开心
-## task
-### 第一次会议
-- 群里的代码找个位置copy过来
-- 解压并且读取最后一次提交的代码
-- 是否为py？
-- 删掉注释内容
-- 处理空格换行
+
+czyFile需解压后放在 D盘根目录下， 即D:\\czyFile\\2061_数组_求到达数组末端的最小移动数_1577371584339.zip之类
+非放在根目录的，其后果自负
