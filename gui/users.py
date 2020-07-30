@@ -97,6 +97,7 @@ class users:
     def __initRatioDict(self):
         result = dict()
         for path in self.userPathList:
+            print(path)
             code = open(path, encoding='utf8').read()
             partial_ratio = Partial_ratio(code=code, jsonParser=self.jsonParser)
             result[path] = partial_ratio

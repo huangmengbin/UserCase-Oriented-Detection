@@ -79,8 +79,8 @@ class Partial_ratio:
         maxStringLength = len(keyWords) * 2
         lrPtrList = []
         resultRatio = 0.0
-        for leftPtr in range(len(longMessage) - 1):
-            for rightPtr in range(leftPtr, len(longMessage)):
+        for leftPtr in range(len(longMessage)):
+            for rightPtr in range(leftPtr, 1 + len(longMessage)):
                 newString = ' '.join(longMessage[leftPtr:rightPtr])
                 if len(newString) > maxStringLength:
                     break
@@ -90,6 +90,9 @@ class Partial_ratio:
                     lrPtrList = [(leftPtr, rightPtr), ]
                 elif tmpRatio == resultRatio:
                     lrPtrList.append((leftPtr, rightPtr,))
+        if resultRatio < 0.85:
+            print('delete', lrPtrList)
+            lrPtrList.clear()
         return resultRatio, lrPtrList
 
     def __in(self):
